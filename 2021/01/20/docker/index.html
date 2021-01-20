@@ -6,13 +6,17 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://example.com">
-  <title>Archives | Hexo</title>
+  <title>Hexo</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta property="og:type" content="website">
+  <meta name="description" content="docker依赖于宿主机的内核（包括硬件、网络等），不同容器间彻底隔离，没有共用的依赖，所以启动更轻量级。 适用于devops开发与运维环境的迁移，在高负载时服务器的快速扩容。 一、容器化和虚拟机的对比Docker不需要Hypervisor实现硬件资源虚拟化,不需要重新加载一个操作系统内核，Docker守护进程可以直接与主操作系统进行通信，为各个Docker容器分配资源；它还可以将容器与主操作系统">
+<meta property="og:type" content="article">
 <meta property="og:title" content="Hexo">
-<meta property="og:url" content="http://example.com/archives/index.html">
+<meta property="og:url" content="http://example.com/2021/01/20/docker/index.html">
 <meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="docker依赖于宿主机的内核（包括硬件、网络等），不同容器间彻底隔离，没有共用的依赖，所以启动更轻量级。 适用于devops开发与运维环境的迁移，在高负载时服务器的快速扩容。 一、容器化和虚拟机的对比Docker不需要Hypervisor实现硬件资源虚拟化,不需要重新加载一个操作系统内核，Docker守护进程可以直接与主操作系统进行通信，为各个Docker容器分配资源；它还可以将容器与主操作系统">
 <meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2021-01-20T03:16:57.699Z">
+<meta property="article:modified_time" content="2021-01-20T03:16:57.699Z">
 <meta property="article:author" content="John Doe">
 <meta name="twitter:card" content="summary">
   
@@ -150,235 +154,433 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
-  
-  
+            <article id="post-docker" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
     
-    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>docker依赖于宿主机的内核（包括硬件、网络等），不同容器间彻底隔离，没有共用的依赖，所以启动更轻量级。</p>
+<p>适用于devops开发与运维环境的迁移，在高负载时服务器的快速扩容。</p>
+<h1 id="一、容器化和虚拟机的对比"><a href="#一、容器化和虚拟机的对比" class="headerlink" title="一、容器化和虚拟机的对比"></a>一、容器化和虚拟机的对比</h1><p>Docker不需要Hypervisor实现硬件资源虚拟化,不需要重新加载一个操作系统内核，<strong>Docker守护进程</strong>可以直接与<strong>主操作系统</strong>进行通信，为各个<strong>Docker容器</strong>分配资源；它还可以将容器与<strong>主操作系统</strong>隔离，并将各个容器互相隔离。<strong>虚拟机</strong>启动需要数分钟，而<strong>Docker容器</strong>可以在数毫秒内启动。</p>
+<p>说了这么多Docker的优势，大家也没有必要完全否定<strong>虚拟机</strong>技术，因为两者有不同的使用场景。<strong>虚拟机</strong>更擅长于彻底隔离整个运行环境。例如，云服务提供商通常采用虚拟机技术隔离不同的用户。而<strong>Docker</strong>通常用于隔离不同的应用，例如<strong>前端</strong>，<strong>后端</strong>以及<strong>数据库</strong>。</p>
+<p>它的实现是基于<strong>Cgroups</strong>来约束和修改进程的动态表现，制造出一个<code>边界</code>，<strong>nameSpace</strong>技术来修改进程视图。</p>
+<ul>
+<li>namespace:新创建的线程看到的是一个全新的进程空间，通过修改进程看待整个计算机”视图”，在这个空间里它的pid是1，但在宿主机真实的进程空间里，这个进程的PID还是真实值，所以说容器其实只是一种特殊的进程(但不是单进程。而是只有一个进程可控)</li>
+<li>Cgroups:虽然有了namespace，容器只能看到容器里的情况，但在宿主机上，它和别的进程之间依然是平等竞争关系，所以需要Cgroup进行进程资源限制(CPU、内存、磁盘、带宽等等)</li>
+<li>rootfs:通过chroot修改容器进程的根目录，并在新建的根目录中挂载了整个操作系统的文件和目录。所以打包时，打包的既是应用，也是操作系统文件，所以才能保证容器的一致性。容器镜像一般会挂载在/var/lib/docker目录下</li>
+</ul>
+<p>当然容器化存在一些虚拟化没有的问题，那就是隔离不彻底。</p>
+<ol>
+<li>容器共享宿主机内核，尽管可以通过Mount Namespace单独挂载其他不同版本的操作系统文件，但如果要在Windows宿主机上运行Linux容器，或者在低版本的Linux宿主机上运行高版本的Linux容器，都是行不通的</li>
+<li>在Linux内核中，很多资源和对象是不能被NameSpace化的，比如时间</li>
+<li>cgroups对资源的限制能力不完全，比如/proc文件，它主要存储内核运行状态，并且它不知道用户通过cgroups对这个容器做了怎么样的资源限制，所以应用程序在容器里读CPU核数、可用内存等信息，都是看的宿主机的信息</li>
+</ol>
+<h1 id="二、组成"><a href="#二、组成" class="headerlink" title="二、组成"></a>二、组成</h1><ul>
+<li>Client</li>
+</ul>
+<p>客户端可以通过docker build、docker pull、docker run命令对docker Host进行操作</p>
+<ul>
+<li>Docker Host</li>
+</ul>
+<p>Docker Host中包含镜像和容器</p>
+<ul>
+<li>Registry</li>
+</ul>
+<p>是Docker的镜像存储的服务器，服务器下有多个仓库。或者这么说，Docker干的事情就是把整个应用、操作系统、配置打包成一个静态的镜像，这个镜像可以快速的启动和停止。但这种能力对单个人是没有多大意义的，我们需要有个地方把镜像存下来，然后用一个url分享给其他人。</p>
+<h1 id="三、三要素：仓库、镜像、容器"><a href="#三、三要素：仓库、镜像、容器" class="headerlink" title="三、三要素：仓库、镜像、容器"></a>三、三要素：仓库、镜像、容器</h1><p>在docker中所有的image(镜像)都在Docker Hub（docker仓库）中，开发人员可以把自己的容器打包一个镜像到Docker Hub中让运维人员去拉取镜像。</p>
+<blockquote>
+<p>Docker Hub官网：<a target="_blank" rel="noopener" href="https://hub.docker.com/">https://hub.docker.com</a></p>
+</blockquote>
+<p>镜像不可以直接使用，需要创建Container(容器)后使用，一个镜像相当于java中的类，容器相当于类的一个实例</p>
+<p>docker的镜像都是只读的，当容器启动的时候，一个新的可写层被加载到镜像的顶部。</p>
+<p>这一层通常被称为<strong>容器层</strong>，容器层之下的都叫<strong>镜像层</strong></p>
+<h1 id="四、centOS-Docker-安装"><a href="#四、centOS-Docker-安装" class="headerlink" title="四、centOS Docker 安装"></a>四、centOS Docker 安装</h1><blockquote>
+<p>前提：</p>
+<p>Docker支持以下的centOS版本：</p>
+<p>Docker运行在centos7上，要求操作系统64位，系统内核版本3.10以上</p>
+<p>Docker运行在centos6.5或更高版本的CentOS上，要求操作系统64位，系统内核版本为2.6.32-431或更高版本</p>
+<p>通过命令uname -r查看centos版本</p>
+</blockquote>
+<ol>
+<li><p>使用 <code>root</code> 权限登录 Centos。确保 yum 包更新到最新。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo yum update</span><br></pre></td></tr></table></figure></li>
+<li><p>卸载旧版本(如果安装过旧版本的话)</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo yum remove docker  docker-common docker-selinux docker-engine</span><br></pre></td></tr></table></figure></li>
+<li><p>安装需要的软件包， yum-util 提供yum-config-manager功能，另外两个是devicemapper驱动依赖的</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo yum install -y yum-utils device-mapper-persistent-data lvm2</span><br></pre></td></tr></table></figure></li>
+<li><p>设置yum源</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo</span><br></pre></td></tr></table></figure></li>
+<li><p>可以查看所有仓库中所有docker版本，并选择特定版本安装</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum list docker-ce --showduplicates | sort -r</span><br></pre></td></tr></table></figure></li>
+<li><p>安装docker</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sudo yum install docker-ce  <span class="comment">#由于repo中默认只开启stable仓库，故这里安装的是最新稳定版17.12.0</span></span><br><span class="line"><span class="comment">#也可以安装特定版本</span></span><br><span class="line">sudo yum install &lt;FQPN&gt;  <span class="comment"># 例如：sudo yum install docker-ce-17.12.0.ce</span></span><br></pre></td></tr></table></figure></li>
+<li><p>启动并加入开机启动(需要的话)</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo systemctl start docker</span><br><span class="line">sudo systemctl enable docker</span><br></pre></td></tr></table></figure></li>
+<li><p>验证安装是否成功(有client和service两部分表示docker安装启动都成功了)</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker version</span><br></pre></td></tr></table></figure>
+<h1 id="五、阿里云镜像加速"><a href="#五、阿里云镜像加速" class="headerlink" title="五、阿里云镜像加速"></a>五、阿里云镜像加速</h1></li>
+<li><p>访问dev.aliyun.com，登录后进入容器镜像服务</p>
+<p><a target="_blank" rel="noopener" href="https://cr.console.aliyun.com/cn-hangzhou/instances/mirrors">https://cr.console.aliyun.com/cn-hangzhou/instances/mirrors</a></p>
+</li>
+<li><p>点击镜像加速，点击centos</p>
+<blockquote>
+<p>里面有加速的详细步骤，如果是centos7及以上修改配置文件/etc/docker/daemon.json</p>
+<p>sudo mkdir -p /etc/docker<br>sudo vi /etc/docker/daemon.json </p>
+<p>{<br>“registry-mirrors”: [“<a href="https://62kwbtgx.mirror.aliyuncs.com&quot;]">https://62kwbtgx.mirror.aliyuncs.com&quot;]</a><br>}</p>
+<p>sudo systemctl daemon-reload<br>sudo systemctl restart docker</p>
+<p>ps:记得修改registry-mirrors为自己的加速器地址</p>
+</blockquote>
+<p>“<a target="_blank" rel="noopener" href="http://dbe35452.m.daocloud.io”/">http://dbe35452.m.daocloud.io”</a>,</p>
+<p>“dns”:[“8.8.8.8”,”8.8.4.4”]</p>
+</li>
+</ol>
+<p>#六、Docker命令</p>
+<ol>
+<li><p>从远程仓库搜索某个镜像</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker search 镜像名</span><br></pre></td></tr></table></figure></li>
+<li><p>从远程仓库中拉取镜像到本地</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">docker pull 注册服务器的仓库名/镜像名:Tag</span><br><span class="line"><span class="meta">#</span><span class="bash"> Tag省略则默认latest</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 例如：</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> docker pull ubuntu</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> docker pull dl.dockerpool.com/ubuntu:5000</span></span><br></pre></td></tr></table></figure></li>
+<li><p>查看本地镜像</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker images</span><br></pre></td></tr></table></figure>
+<p>-a:查看本地镜像及其包含的镜像</p>
+</li>
+<li><p>移除某个镜像</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker rmi 镜像名</span><br></pre></td></tr></table></figure></li>
+<li><p>创建某个容器并运行</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run 镜像名 参数</span><br></pre></td></tr></table></figure>
+<p>执行步骤：在本地寻找改镜像-&gt;找到则创建容器实例运行，否则去docker hub上查找改镜像-&gt;Hub上找到该镜像则下载镜像到本地并以该镜像为模板生产容器实例运行，否则返回错误信息</p>
+<p>-d: 后台运行容器,返回容器id,也即守护进程方式运行，但容器后台运行，就必须有一个前台进程，否则认为没有任务了会自动关闭，所以最佳的解决方案是，将你要运行的程序以前台进程的形式运行</p>
+<blockquote>
+<p>docker run -d centos /bin/sh -c “while true;do echo hello zzyy;sleep 2;done”</p>
+</blockquote>
+<p>– name=容器新名字</p>
+<p>-i:以交互模式运行容器，通常与-t连用</p>
+<p>-t:为容器重新分配一个伪输入终端，通常与-i同时使用</p>
+<p>-P:随机端口映射</p>
+<p>-p:指定端口映射，hostPort:containerPort</p>
+</li>
+<li><p>查看容器</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">docker ps		#查看运行的容器</span><br><span class="line">docker ps -a 	#查看所有容器</span><br><span class="line">docker ps -n 10 #查看最近10次运行过的容器</span><br></pre></td></tr></table></figure></li>
+<li><p>以-it方式进入容器时退出容器</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">exit	#退出并停止容器	</span><br><span class="line">ctrl+p+q #退出但不停止容器</span><br></pre></td></tr></table></figure></li>
+<li><p>重新进入后台运行的容器</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker exec -it 容器id  /bin/bash  #在容器中打开新的终端，并且启动新的进程，可以在当前容器直接返回查询结果也可以进入容器</span><br><span class="line">attach #直接进入容器，不会启动新的进程</span><br></pre></td></tr></table></figure>
+<p>docker容器内一般没有vi命令，可以通过以下方式下载vi命令,但这种修改是临时性的，需要永久可以通过挂载</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">apt-get update</span><br><span class="line">apt-get install vim	#下载vi命令</span><br><span class="line">docker run -v localConfigFile:/containerPath</span><br></pre></td></tr></table></figure></li>
+<li><p>容器与主机间文件的互相拷贝</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker cp 容器id:容器内路径 目的主机路径</span><br><span class="line">docker cp 主机文件路径 容器id/容器名：要拷贝到容器里面对应的路径</span><br></pre></td></tr></table></figure></li>
+<li><p>启动容器</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker start 容器id或容器名</span><br></pre></td></tr></table></figure></li>
+<li><p>停止容器</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker stop 容器id或容器名	#运行结束所有任务后关闭</span><br><span class="line">docker kill 容器id或容器名	#强制关闭</span><br></pre></td></tr></table></figure></li>
+<li><p>删除容器</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker rm 容器id或容器名</span><br></pre></td></tr></table></figure></li>
+<li><p>查看容器日志</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker logs 容器id</span><br></pre></td></tr></table></figure>
+<p>-f  实时监控日志</p>
+</li>
+<li><p>查看容器内运行的进程</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker top 容器id</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>查看容器详情</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker inspect 容器名/id</span><br></pre></td></tr></table></figure></li>
+<li><p>提交本地容器到本地镜像库中</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker commit -a=&quot;作者名&quot; -m=&quot;描述&quot; 容器id 新镜像名:Tag</span><br></pre></td></tr></table></figure></li>
+<li><p>提交本地镜像到镜像仓库</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker image push NAME[:tag]</span><br><span class="line"><span class="meta">#</span><span class="bash"> 可能要先完成认证授权后才执行push操作 docker login</span></span><br></pre></td></tr></table></figure></li>
+<li><p>导出本地镜像到本地tar</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker image save -o 镜像名</span><br></pre></td></tr></table></figure></li>
+<li><p>tar包导入本地镜像</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker load -i tar包位置</span><br></pre></td></tr></table></figure>
+
+
+</li>
+</ol>
+<h1 id="七、数据卷容器"><a href="#七、数据卷容器" class="headerlink" title="七、数据卷容器"></a>七、数据卷容器</h1><p>##1. 设计目的和特点</p>
+<p>Docker容器产生的数据，如果不通过docker commit生成新的镜像，使得数据作为镜像的一部分保存下来，那么当容器删除后，数据自然就没有了，我们希望：</p>
+<ul>
+<li>数据是持久化的</li>
+<li>容器之间可以共享数据</li>
+<li>容器与宿主机的文件共享</li>
+</ul>
+<p>卷的设计目的就是数据的持久化，完全独立于容器的生命周期，因此Docker不会在容器删除时删除其挂载的数据卷。</p>
+<p><strong>特点</strong></p>
+<ol>
+<li>数据卷可在容器之间共享或重用数据</li>
+<li>卷中的更改可以直接生效</li>
+<li>数据卷中的更改不会包含在镜像的更新中</li>
+<li>数据卷的生命周期一直持续到没有容器使用它为止</li>
+</ol>
+<p>##2. 容器卷的添加方式</p>
+<ol>
+<li><p>直接命令添加(即挂载)</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -it v /宿主机绝对路径:/容器内路径 镜像id/镜像名</span><br></pre></td></tr></table></figure>
+<p>容器内路径后面跟:ro 表示readonly只读</p>
+<p>可能碰到的问题：cannot open directory:Permission denied</p>
+<p>解决方法:在挂载目录后多加一个–privileged = true参数即可</p>
+</li>
+<li><p>dockerFile添加</p>
+<ul>
+<li><p>在主机上新建一个dockerFile</p>
+</li>
+<li><p>可以使用volume指令来给镜像添加一个或多个数据卷</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">volume[&quot;容器内路径1&quot;,&quot;容器内路径2&quot;,&quot;容器内路径3&quot;]</span><br></pre></td></tr></table></figure>
+<p>说明:</p>
+<p>由于可移植和分享的考虑，用-v主机目录：容器目录这种方法不能直接在Dockerfile中实现。</p>
+<p>由于宿主机目录路径是依赖于特定虚拟机的，并不能够保证所有的宿主机上存在这样的特定目录。</p>
+</li>
+<li><p>File构造</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">FROM 原镜像名</span><br><span class="line">VOLUME [&quot;容器内路径1&quot;,&quot;容器内路径2&quot;]</span><br><span class="line">CMD echo &quot;finished,-------success1&quot;</span><br><span class="line">CMD /bin/bash</span><br></pre></td></tr></table></figure></li>
+<li><p>build后生成新的镜像</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker build -f dockerfile路径 -t 新镜像名 .</span><br></pre></td></tr></table></figure></li>
+<li><p>run容器</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -it 新镜像名</span><br></pre></td></tr></table></figure></li>
+<li><p>主机对应默认地址</p>
+<p>通过docker inspact 容器id查看容器详情</p>
+<p>在Volumes中可以看到挂载的地址</p>
+<p>默认地址:/var/lib/docker/volumes/编号/_data</p>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="3-数据卷容器"><a href="#3-数据卷容器" class="headerlink" title="3. 数据卷容器"></a>3. 数据卷容器</h2><p>命名的容器挂载数据卷，其它容器通过挂载这个(父容器)实现<strong>数据共享</strong>，挂载数据卷的容器，称之为数据卷容器</p>
+<p>即 容器间传递共享(–volumes-from)</p>
+<ol>
+<li><p>先启动一个父容器dc01</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -it --name dc01 dockerfile新建的镜像名</span><br></pre></td></tr></table></figure></li>
+<li><p>在dc01容器的挂载目录下创建一个新文件</p>
+</li>
+<li><p>让dc02、dc03继承自dc01</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker run -it --name dc02 --volumes-from dc01 dockerfile新建的镜像名</span><br><span class="line">docker run -it --name dc03 --volumes-from dc01 dockerfile新建的镜像名</span><br></pre></td></tr></table></figure></li>
+<li><p>至此实现了dc01、dc02、dc03之间的数据共享</p>
+</li>
+<li><p>可以自由的增加或者删除同一个数据卷容器下的容器，容器的生命周期一直到没有容器使用它为止</p>
+</li>
+</ol>
+<h1 id="八、-docker-File"><a href="#八、-docker-File" class="headerlink" title="八、 docker File"></a>八、 docker File</h1><p>指令编写的镜像描述性文件，每条指令都会创建一个新的镜像层，并对镜像进行提交，指令从上到下顺序执行。</p>
+<p>使用步骤：</p>
+<ol>
+<li>手动编写一个dockerfile文件，当然，必须符合file规范</li>
+<li>直接 <code>docker build -t imageName .</code> 命令执行，获得一个自定义的镜像</li>
+<li>run -it –name 别名 自定义镜像名</li>
+</ol>
+<p>##1. 关键字</p>
+<ol>
+<li><p>From</p>
+<p>父镜像名，scratch是元镜像，是所有镜像的父类，相当于java中的Object对象</p>
+</li>
+<li><p>MAINTAINER</p>
+<p>镜像的作者 和 邮箱</p>
+</li>
+<li><p>RUN</p>
+<p>容器构建时需要运行的命令</p>
+</li>
+<li><p>ADD</p>
+<p>将宿主机目录下的文件拷贝进镜像且ADD命令会自动处理URL和解压tar压缩包</p>
+</li>
+<li><p>COPY</p>
+<p>类似ADD，拷贝文件和目录到镜像中，但不会自动解压tar包</p>
+</li>
+<li><p>LABEL</p>
+<p>标签</p>
+</li>
+<li><p>CMD</p>
+<p>容器启动时要运行的命令，DockerFile中可以有多个CMD命令，但只有最后一个生效，CMD会被docker run最后的参数替换比如bash</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">CMD[&quot;/bin/bash&quot;]</span><br><span class="line">CMD[&quot;catalina.sh&quot;,&quot;run&quot;]</span><br></pre></td></tr></table></figure></li>
+<li><p>ENTRYPOINT</p>
+<p>ENTRYPOINT的目的和CMD一样，都是指定容器启动的参数,但不会被docker run命令的参数替换</p>
+</li>
+<li><p>EXPOSE</p>
+<p>暴露的端口号</p>
+</li>
+<li><p>WORKDIR</p>
+<p>进入容器后默认的路径，不指定则为根目录</p>
+</li>
+<li><p>ENV</p>
+<p>用来在构建镜像过程中设置环境变量</p>
+</li>
+<li><p>VOLUME</p>
+<p>需要挂载的容器文件夹路径</p>
+</li>
+<li><p>ONBUILD</p>
+<p>父镜像的在被子镜像继承后父镜像的onbuild被触发</p>
+</li>
+</ol>
+<p>##2. 实例</p>
+<p>运行一个jar包</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">FROM java:8</span><br><span class="line"></span><br><span class="line">VOLUME /tmp</span><br><span class="line"></span><br><span class="line">COPY business.jar business.jar</span><br><span class="line"></span><br><span class="line">RUN bash -c &quot;touch /business.jar&quot;</span><br><span class="line"></span><br><span class="line">EXPOSE 10900</span><br><span class="line"></span><br><span class="line">ENTRYPOINT [&quot;java&quot;, &quot;-jar&quot;, &quot;business.jar&quot;, &quot;--spring.profiles.active=test&quot;, &quot;--server.port=10900&quot;,&quot;&gt; /log/business.log&quot;]</span><br></pre></td></tr></table></figure>
+<h1 id="九、本地镜像推送到阿里云"><a href="#九、本地镜像推送到阿里云" class="headerlink" title="九、本地镜像推送到阿里云"></a>九、本地镜像推送到阿里云</h1><ol>
+<li><p>登陆阿里云 管理控制台</p>
+<p><a target="_blank" rel="noopener" href="https://cr.console.aliyun.com/cn-hangzhou/instances/mirrors">https://cr.console.aliyun.com/cn-hangzhou/instances/mirrors</a></p>
+</li>
+<li><p>镜像仓库-&gt;创建镜像仓库</p>
+</li>
+<li><p>点击镜像管理（里面有详细操作步骤）</p>
+<ul>
+<li><p>将本地镜像推送到阿里云</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker login --username=云上的小基特 registry.cn-shanghai.aliyuncs.com</span><br></pre></td></tr></table></figure>
+<p>输入用户名密码</p>
+<p>开始推送镜像到阿里云</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker tag [ImageId] registry.cn-shanghai.aliyuncs.com/chen_hanlin/redis:[镜像版本号]</span><br><span class="line">docker push registry.cn-shanghai.aliyuncs.com/chen_hanlin/redis:[镜像版本号]</span><br></pre></td></tr></table></figure>
+<p>推送完成</p>
+</li>
+<li><p>从阿里云拉取镜像</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker pull registry.cn-shanghai.aliyuncs.com/chen_hanlin/redis:[镜像版本号]</span><br></pre></td></tr></table></figure>
+<h1 id="十、-镜像仓库"><a href="#十、-镜像仓库" class="headerlink" title="十、 镜像仓库"></a>十、 镜像仓库</h1></li>
+</ul>
+</li>
+</ol>
+<p>镜像仓库主流实现方案有两种：Docker Registry 和 Harbor</p>
+<h2 id="1-Docker-Registry"><a href="#1-Docker-Registry" class="headerlink" title="1. Docker Registry"></a>1. Docker Registry</h2><p>镜像仓库是容器三大核心组件中的重要组成部分，Docker 镜像仓库一般有本地镜像仓库、Docker Hub 公共仓库和其他第三方公共仓库三种。一个 Docker Registry中科院包含多个仓库(Repository)；每个仓库科院包含多个标签(tag)；每个标签对应一个镜像</p>
+<p>Docker Hub 是 Docker 公司官方提供的公共镜像仓库，此镜像库中提供了上万种官方镜像文件</p>
+<p>但国内访问 Docker Hub 上的服务比较慢，因此国内主流容器云服务商提供了针对Docker Hub的镜像服务，这些镜像服务被称为加速器。</p>
+<p>国内也有一些主流的容器云服务商提供类似于Docker Hub 的公开服务。比如网易云镜像服务、阿里云镜像库、DaoCloud镜像市场等，这些镜像仓库上也会提供不少镜像文件供用户下载使用</p>
+<p>具有一定规模的企业都会建立自己的私有镜像仓库，我们在Docker1.12以后的版本环境中搭建无认证的Registry。Dockerd 的配置文件在 /etc/docker/daemon.json 中，如果没有开源手动创建</p>
+<h2 id="2-Harbor"><a href="#2-Harbor" class="headerlink" title="2. Harbor"></a>2. Harbor</h2><p>Harbor 是由 VMware 公司开源的容器镜像仓库，它在 Docker Registry 的基础上进行了企业级扩展，包括基于角色的权限控制、AD/LDAP集成、可视化管理界面、日志审计等，它同 Docker Registry 一样提供容器镜像的存储及分发服务，但与Docker Registry有很多不同，Harvor 进行了不少优化及改进</p>
+<ol>
+<li>传输侠侣优化，Harbor根据镜像每层的UUID标识进行增量同步，而不是全量同步，减少带宽</li>
+<li>镜像仓库水平扩展，由于上传、下载镜像文件设计大量耗时IO操作，当用户对性能有较高要求时，需要创建多个Registry，通过负载均衡器将访问压力分发到不同Registry，同时多个Registry存储时进行镜像文件的同步，便于水平扩展</li>
+<li>用户认证，Harbor 在 Docker Registry 的基础上扩展了用户认证授权的功能，用户在Haror中进行访问需要携带token，以增强安全性</li>
+<li>镜像安全扫描，上传到Harbor上的镜像文件能够通过clair的安全扫描，以发现镜像中存在的安全漏洞，并提高镜像文件的安全性</li>
+<li>提供Web界面以优化用户体验：Registry 只提供命令行方式，没有曹邹界面，而Harbor提供用户界面，可以支持登录、搜索功能，镜像分类管理包括区分共有、私有镜像等功能，优化了用户管理及操作体验</li>
+</ol>
+
+      
+
+      
+        <div class="page-reward">
+          <a href="javascript:;" class="page-reward-btn tooltip-top">
+            <div class="tooltip tooltip-east">
+            <span class="tooltip-item">
+              赏
+            </span>
+            <span class="tooltip-content">
+              <span class="tooltip-text">
+                <span class="tooltip-inner">
+                  <p class="reward-p"><i class="icon icon-quo-left"></i>谢谢你请我吃糖果<i class="icon icon-quo-right"></i></p>
+                  <div class="reward-box">
+                    
+                    
+                  </div>
+                </span>
+              </span>
+            </span>
+          </div>
+          </a>
+        </div>
+      
+    </div>
+    <div class="article-info article-info-index">
       
       
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2021" class="archive-year">2021</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/01/20/%E7%BC%93%E5%AD%98/" class="archive-article-date">
-  	<time datetime="2021-01-20T03:16:57.782Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-01-20</time>
-</a>
-        </div>
-    	 
-        <div class="article-info info-on-right">
-          
-          
+      
 
+      
+
+      
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
         </div>
-        <div class="clearfix"></div>
-    </header>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//pan.baidu.com/share/qrcode?url=http://example.com/2021/01/20/docker/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
+      
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/01/20/%E5%93%8D%E5%BA%94%E5%BC%8F%E7%BC%96%E7%A8%8B/" class="archive-article-date">
-  	<time datetime="2021-01-20T03:16:57.767Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-01-20</time>
-</a>
-        </div>
-    	 
-        <div class="article-info info-on-right">
-          
-          
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
   
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/01/20/%E5%88%86%E5%B8%83%E5%BC%8F%E4%B8%80%E8%87%B4%E6%80%A7%E9%97%AE%E9%A2%98/" class="archive-article-date">
-  	<time datetime="2021-01-20T03:16:57.761Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-01-20</time>
-</a>
-        </div>
-    	 
-        <div class="article-info info-on-right">
-          
-          
+<nav id="article-nav">
+  
+    <a href="/2021/01/20/es/" id="article-nav-newer" class="article-nav-link-wrap">
+      <i class="icon-circle-left"></i>
+      <div class="article-nav-title">
+        
+          (no title)
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2021/01/20/cucumber/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title"></div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/01/20/rockermq%E5%AE%95%E6%9C%BA%E5%8F%8A%E9%87%8D%E5%A4%8D%E6%B6%88%E8%B4%B9%E9%97%AE%E9%A2%98/" class="archive-article-date">
-  	<time datetime="2021-01-20T03:16:57.756Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-01-20</time>
-</a>
-        </div>
-    	 
-        <div class="article-info info-on-right">
-          
-          
 
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
         </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/01/20/nacos/" class="archive-article-date">
-  	<time datetime="2021-01-20T03:16:57.751Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-01-20</time>
-</a>
-        </div>
-    	 
-        <div class="article-info info-on-right">
-          
-          
+        
+        
+    </div>
+</aside>
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/01/20/linux/" class="archive-article-date">
-  	<time datetime="2021-01-20T03:16:57.744Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-01-20</time>
-</a>
-        </div>
-    	 
-        <div class="article-info info-on-right">
-          
-          
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/01/20/jvm/" class="archive-article-date">
-  	<time datetime="2021-01-20T03:16:57.738Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-01-20</time>
-</a>
-        </div>
-    	 
-        <div class="article-info info-on-right">
-          
-          
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/01/20/java%E5%B9%B6%E5%8F%91%E5%9F%BA%E7%A1%80/" class="archive-article-date">
-  	<time datetime="2021-01-20T03:16:57.731Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-01-20</time>
-</a>
-        </div>
-    	 
-        <div class="article-info info-on-right">
-          
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/01/20/graphql/" class="archive-article-date">
-  	<time datetime="2021-01-20T03:16:57.723Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-01-20</time>
-</a>
-        </div>
-    	 
-        <div class="article-info info-on-right">
-          
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/01/20/flink/" class="archive-article-date">
-  	<time datetime="2021-01-20T03:16:57.716Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-01-20</time>
-</a>
-        </div>
-    	 
-        <div class="article-info info-on-right">
-          
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
   
   
-    </div></section>
   
 
-    
-    <nav id="page-nav">
-      <span class="page-number current">1</span><a class="page-number" href="/archives/page/2/">2</a><a class="page-number" href="/archives/page/3/">3</a><a class="extend next" rel="next" href="/archives/page/2/">Next &amp;raquo;</a>
-    </nav>
+  
+
+  
+
   
 
 
@@ -402,8 +604,8 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
-		isArchive: true,
+		isPost: true,
+		isArchive: false,
 		isTag: false,
 		isCategory: false,
 		open_in_new: false,

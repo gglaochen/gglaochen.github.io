@@ -6,15 +6,21 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://example.com">
-  <title>Archives | Hexo</title>
+  <title>Hexo</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta property="og:type" content="website">
+  <meta name="description" content="一、Cucumber简介cucumber使用自然语言来描述测试，使得非程序员可以理解他们。Gherkin是这种自然语言测试的简单语法，而Cucumber是可以执行它们的工具。cucumber本质上是使用根据正则表达式来匹配自然语言，然后依次执行对应的方法，以达到测试的目的。 二、Gherkin简介Gherkin是自然语言测试的简单语法。一个完整的测试是由多个step组成的，step即最小单元，如何">
+<meta property="og:type" content="article">
 <meta property="og:title" content="Hexo">
-<meta property="og:url" content="http://example.com/archives/index.html">
+<meta property="og:url" content="http://example.com/2021/01/20/cucumber/index.html">
 <meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="一、Cucumber简介cucumber使用自然语言来描述测试，使得非程序员可以理解他们。Gherkin是这种自然语言测试的简单语法，而Cucumber是可以执行它们的工具。cucumber本质上是使用根据正则表达式来匹配自然语言，然后依次执行对应的方法，以达到测试的目的。 二、Gherkin简介Gherkin是自然语言测试的简单语法。一个完整的测试是由多个step组成的，step即最小单元，如何">
 <meta property="og:locale" content="en_US">
+<meta property="og:image" content="d:/NOTE/images/a.png">
+<meta property="article:published_time" content="2021-01-20T03:16:57.692Z">
+<meta property="article:modified_time" content="2021-01-20T03:16:57.692Z">
 <meta property="article:author" content="John Doe">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="d:/NOTE/images/a.png">
   
     <link rel="alternative" href="/atom.xml" title="Hexo" type="application/atom+xml">
   
@@ -150,235 +156,236 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
-  
-  
+            <article id="post-cucumber" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
     
-    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="一、Cucumber简介"><a href="#一、Cucumber简介" class="headerlink" title="一、Cucumber简介"></a>一、Cucumber简介</h1><p>cucumber使用自然语言来描述测试，使得非程序员可以理解他们。<a target="_blank" rel="noopener" href="https://links.jianshu.com/go?to=https://docs.cucumber.io/gherkin">Gherkin</a>是这种自然语言测试的简单语法，而Cucumber是可以执行它们的工具。<br>cucumber本质上是使用根据正则表达式来匹配自然语言，然后依次执行对应的方法，以达到测试的目的。</p>
+<h1 id="二、Gherkin简介"><a href="#二、Gherkin简介" class="headerlink" title="二、Gherkin简介"></a>二、Gherkin简介</h1><p>Gherkin是自然语言测试的简单语法。<br>一个完整的测试是由多个step组成的，step即最小单元，如何复用step是非常关键的问题。多个step组成一个Scenario，即一个完整的测试case。多个Scenario组成一个Feature，即一组相关的测试case。</p>
+<h1 id="三、-BDD"><a href="#三、-BDD" class="headerlink" title="三、 BDD"></a>三、 BDD</h1><p>行为驱动开发的根基是一种“通用语言”。这种通用语言同时被客户和开发者用来定义系统的行为。由于客户和开发者使用同一种语言来描述同一个系统， 可以最大程度避免表达不一致带来的问题。</p>
+<p><img src="D:\NOTE\images\a.png" alt="a"></p>
+<p>BDD并不是一种软件研发方法，而是把现有的工作方法融合起来，让软件研发团队更加高效的工作，从而减轻因软件产品计划延误或功能缺失带来的压力</p>
+<h1 id="四、-关键字"><a href="#四、-关键字" class="headerlink" title="四、 关键字"></a>四、 关键字</h1><ul>
+<li>Feature：功能</li>
+<li>Scenario：场景</li>
+<li>Given，When，Then，And，But（steps）：测试步骤（要有对应的步骤方法）</li>
+<li>Background：背景</li>
+<li>Scenario Outline (or Scenario Template)：场景模板</li>
+<li>Examples (or Scenarios)：例子</li>
+</ul>
+<h1 id="五、使用"><a href="#五、使用" class="headerlink" title="五、使用"></a>五、使用</h1><h2 id="1-添加Maven依赖"><a href="#1-添加Maven依赖" class="headerlink" title="1. 添加Maven依赖"></a>1. 添加Maven依赖</h2><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>info.cukes<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>cucumber-java<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">scope</span>&gt;</span>test<span class="tag">&lt;/<span class="name">scope</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">version</span>&gt;</span>1.2.4<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>junit<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>junit<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">version</span>&gt;</span>4.12<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h2 id="2-创建src-test-resources文件夹并定义-feature文件"><a href="#2-创建src-test-resources文件夹并定义-feature文件" class="headerlink" title="2. 创建src/test/resources文件夹并定义.feature文件"></a>2. 创建src/test/resources文件夹并定义.feature文件</h2><figure class="highlight gherkin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">Feature</span>: Is it friday yet?</span><br><span class="line">  this is a descriptions</span><br><span class="line">  Everybody want to know when it&#x27;s Friday</span><br><span class="line"></span><br><span class="line">  <span class="keyword">Scenario</span>: Sunday isn&#x27;t Friday</span><br><span class="line">    <span class="keyword">Given</span> today is Sunday</span><br><span class="line">    <span class="keyword">When</span> I ask whether it&#x27;s Friday yet</span><br><span class="line">    <span class="keyword">Then</span> I should be told <span class="string">&quot;Nope&quot;</span></span><br><span class="line"></span><br><span class="line">  <span class="keyword">Scenario</span>: Friday is Friday</span><br><span class="line">    <span class="keyword">Given</span> today is Friday</span><br><span class="line">    <span class="keyword">When</span> I ask whether it&#x27;s Friday yet</span><br><span class="line">    <span class="keyword">Then</span> I should be told <span class="string">&quot;TGIF&quot;</span></span><br></pre></td></tr></table></figure>
+<h2 id="3-定义step-definition"><a href="#3-定义step-definition" class="headerlink" title="3. 定义step definition"></a>3. 定义step definition</h2><p>step definition是指通过正则表达式对应到一个或多个Gherkin step的java方法。如下例子是上面例子对应的step definition。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">FridayYet</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> String today;<span class="comment">//通过成员变量</span></span><br><span class="line">    <span class="keyword">private</span> String actualAnswer;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="meta">@Given(&quot;^today is (.*)$&quot;)</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">todayIsSunday</span><span class="params">(String day)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.today = day;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@When(&quot;^I ask whether it&#x27;s Friday yet$&quot;)</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">iAskWhetherItsFridayYet</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (<span class="keyword">this</span>.today.equals(<span class="string">&quot;Friday&quot;</span>)) &#123;</span><br><span class="line">            <span class="keyword">this</span>.actualAnswer = <span class="string">&quot;TGIF&quot;</span>;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">this</span>.actualAnswer = <span class="string">&quot;Nope&quot;</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Then(&quot;^I should be told \&quot;(.*)\&quot;$&quot;)</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">iShouldBeToldNope</span><span class="params">(String expectedAnswer)</span> </span>&#123;</span><br><span class="line">        Assert.assertEquals(expectedAnswer, actualAnswer);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="参数详解"><a href="#参数详解" class="headerlink" title="===参数详解==="></a>===参数详解===</h2><p><strong>feature</strong></p>
+<p>Feature是所有测试的开头。后面跟一段描述性的文字，表明这个测试文件是干什么的。</p>
+<p><strong>description</strong></p>
+<p>description是一段扩展性的文字描述，可以跟在Feature、Example、Background、Scenario、Scenario Outline下面。</p>
+<p><strong>Example或Scenario</strong></p>
+<p>Example和Scenario是一对同义词，是一个具体的测试case，包含了多个step。一般情况下，都是由Given（给定一个初始条件），When（发生了什么），Then（结果是什么）组成的。</p>
+<p><strong>Steps</strong></p>
+<p>step是cucubmer的最小单元，每个step是由Given, When, Then, And, 或者But开头的。如果关键词后面的内容是完全一样的话，那么cucumber会认为这两句话是重复的，哪怕前面的关键词不一样，如</p>
+<figure class="highlight gherkin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">Given</span> there is money in my account</span><br><span class="line"><span class="keyword">Then</span> there is money in my account</span><br></pre></td></tr></table></figure>
+<p>这种限制也促使我们使用更加准确的语言去描述</p>
+<figure class="highlight gherkin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">Given</span> my account has a balance of £430</span><br><span class="line"><span class="keyword">Then</span> my account should have a balance of £430</span><br></pre></td></tr></table></figure>
+<p><strong>Given</strong></p>
+<p>Given一般用于在Scenario中描述系统的初始状态。它的目的是使系统在使用前处于一个已只的状态，要避免在Given中谈论交互上的事情。</p>
+<p><strong>When</strong></p>
+<p>When描述一个事件或者动作。他可以是与系统间的交互，也可以是由另一个系统触发的事件。cucumber强烈推荐每个Scenario只有一个When，当你觉得需要加更多的When的时候，通常就是需要拆分成多个Scenario的信号。</p>
+<p><strong>Then</strong></p>
+<p>Then描述期望的输出或者结果。对Then的step definition应该使用断言去比较期望值和实际值，就和单元测试差不多。</p>
+<p><strong>But和And</strong></p>
+<p>当有几个Given，When，Then的时候，可以写成</p>
+<figure class="highlight gherkin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Example: Multiple Givens</span><br><span class="line">  <span class="keyword">Given</span> one thing</span><br><span class="line">  <span class="keyword">Given</span> another thing</span><br><span class="line">  <span class="keyword">Given</span> yet another thing</span><br><span class="line">  <span class="keyword">When</span> I open my eyes</span><br><span class="line">  <span class="keyword">Then</span> I should see something</span><br><span class="line">  <span class="keyword">Then</span> I shouldn&#x27;t see something else</span><br></pre></td></tr></table></figure>
+<p>也可以用And和But增加其可读性</p>
+<figure class="highlight gherkin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Example: Multiple Givens</span><br><span class="line">  <span class="keyword">Given</span> one thing</span><br><span class="line">  <span class="keyword">And</span> another thing</span><br><span class="line">  <span class="keyword">And</span> yet another thing</span><br><span class="line">  <span class="keyword">When</span> I open my eyes</span><br><span class="line">  <span class="keyword">Then</span> I should see something</span><br><span class="line">  <span class="keyword">But</span> I shouldn&#x27;t see something else</span><br></pre></td></tr></table></figure>
+<p>step definition里个人并不建议使用@And和@But，只使用@Given，@When，@Then，这样语言更加明确，因为And和But都可以在Given，When，Then的下面使用。</p>
+<p><strong>Background</strong></p>
+<p>当在同一个Feature里有多个Scenario有相同Given的时候，可以使用Background将这些Given抽到一起。这样这个Feature的每个Scenario在运行的时候，都会先运行一次Background。每个Feature里只能有一个Background。</p>
+<p>提示：</p>
+<ul>
+<li>不要设置复杂的状态，除非该状态实际上是客户需要知道的</li>
+<li>保持background简短，因为在阅读Scenario的时候，是需要记住background的。最好不要超过4行</li>
+<li>一个feature只能有一个background，如果需要不同的background针对不同的方案，就需要分拆成不同的feature</li>
+</ul>
+<p><strong>Scenario Outline</strong></p>
+<p>Scenario Outline即Scenario的模板，也可写作Scenario Template。它可运行相同的Scenario多次。</p>
+<figure class="highlight gherkin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">Scenario</span>: eat 5 out of 12</span><br><span class="line">  <span class="keyword">Given</span> there are 12 cucumbers</span><br><span class="line">  <span class="keyword">When</span> I eat 5 cucumbers</span><br><span class="line">  <span class="keyword">Then</span> I should have 7 cucumbers</span><br><span class="line"></span><br><span class="line"><span class="keyword">Scenario</span>: eat 5 out of 20</span><br><span class="line">  <span class="keyword">Given</span> there are 20 cucumbers</span><br><span class="line">  <span class="keyword">When</span> I eat 5 cucumbers</span><br><span class="line">  <span class="keyword">Then</span> I should have 15 cucumbers</span><br></pre></td></tr></table></figure>
+<p>可用Scenario Outline简化</p>
+<figure class="highlight gherkin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">Scenario</span> <span class="keyword">Outline</span>: eating</span><br><span class="line">  <span class="keyword">Given</span> there are <span class="variable">&lt;start&gt;</span> cucumbers</span><br><span class="line">  <span class="keyword">When</span> I eat <span class="variable">&lt;eat&gt;</span> cucumbers</span><br><span class="line">  <span class="keyword">Then</span> I should have <span class="variable">&lt;left&gt;</span> cucumbers</span><br><span class="line"></span><br><span class="line">  <span class="keyword">Examples</span>:</span><br><span class="line">    |<span class="string"> start </span>|<span class="string"> eat </span>|<span class="string"> left </span>|</span><br><span class="line">    |<span class="string">    12 </span>|<span class="string">   5 </span>|<span class="string">    7 </span>|</span><br><span class="line">    |<span class="string">    20 </span>|<span class="string">   5 </span>|<span class="string">   15 </span>|</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p><strong>DataTable</strong></p>
+<p>Gherkin可以传递List，Map，称为DataTable，具体例子查看该github上的<a target="_blank" rel="noopener" href="https://links.jianshu.com/go?to=https://github.com/cucumber/cucumber/tree/master/datatable">文档</a></p>
+<p><strong>方言</strong></p>
+<p>Gherkin支持多种方言，对应关键字转换查看该<a target="_blank" rel="noopener" href="https://links.jianshu.com/go?to=https://docs.cucumber.io/gherkin/reference/%23spoken-languages">文档</a></p>
+<p>中文：</p>
+<figure class="highlight gherkin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#language: zh-CN</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">| feature          | &quot;功能&quot;       |  </span><br><span class="line">  | background       | &quot;背景&quot;       |  </span><br><span class="line">  | scenario         | &quot;场景&quot;       |  </span><br><span class="line">  | scenario_outline | &quot;场景大纲&quot;    |  </span><br><span class="line">  | examples         | &quot;例子&quot;       |  </span><br><span class="line">  | given            | &quot;* &quot;, &quot;假如&quot; |  </span><br><span class="line">  | when             | &quot;* &quot;, &quot;当&quot;   |  </span><br><span class="line">  | then             | &quot;* &quot;, &quot;那么&quot; |  </span><br><span class="line">  | and              | &quot;* &quot;, &quot;而且&quot; |  </span><br><span class="line">  | but              | &quot;* &quot;, &quot;但是&quot; |  </span><br><span class="line">  | given (code)     | &quot;假如&quot;       |  </span><br><span class="line">  | when (code)      | &quot;当&quot;         |  </span><br><span class="line">  | then (code)      | &quot;那么&quot;       |  </span><br><span class="line">  | and (code)       | &quot;而且&quot;       |  </span><br><span class="line">  | but (code)       | &quot;但是&quot;       | </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>在命令行执行cucumber –i18n zh-CN  命令可以查看到以上列表</p>
+<p><strong>状态共享</strong></p>
+<p>不同step里定义的变量，可以通过java类的成员变量达到共享上下文变量的目的。如上例子的today和actualAnswer。<br>而状态泄露会使得scenarios变得脆弱和难以维护。详细信息查看该<a target="_blank" rel="noopener" href="https://links.jianshu.com/go?to=https://docs.cucumber.io/cucumber/state/">文档</a></p>
+<p><strong>注释</strong></p>
+<p>Gherkin使用#作为注释符号</p>
+<p><strong>step definition</strong></p>
+<p>step definition是指通过正则表达式对应到一个或多个Gherkin step的java方法。如下例子是上面例子对应的step definition</p>
+<figure class="highlight gherkin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">public class FridayYet &#123;</span><br><span class="line"></span><br><span class="line">    private String today;</span><br><span class="line">    private String actualAnswer;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="meta">@Given(&quot;^today</span> is (.<span class="symbol">*</span>)$<span class="string">&quot;)</span></span><br><span class="line"><span class="string">    public void todayIsSunday(String day) &#123;</span></span><br><span class="line"><span class="string">        this.today = day;</span></span><br><span class="line"><span class="string">    &#125;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    @When(&quot;</span>^I ask whether it&#x27;s Friday yet$<span class="string">&quot;)</span></span><br><span class="line"><span class="string">    public void iAskWhetherItsFridayYet() &#123;</span></span><br><span class="line"><span class="string">        if (this.today.equals(&quot;</span>Friday<span class="string">&quot;)) &#123;</span></span><br><span class="line"><span class="string">            this.actualAnswer = &quot;</span>TGIF<span class="string">&quot;;</span></span><br><span class="line"><span class="string">        &#125; else &#123;</span></span><br><span class="line"><span class="string">            this.actualAnswer = &quot;</span>Nope<span class="string">&quot;;</span></span><br><span class="line"><span class="string">        &#125;</span></span><br><span class="line"><span class="string">    &#125;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    @Then(&quot;</span>^I should be told \<span class="string">&quot;(.*)\&quot;$&quot;</span>)</span><br><span class="line">    public void iShouldBeToldNope(String expectedAnswer) &#123;</span><br><span class="line">        Assert.assertEquals(expectedAnswer, actualAnswer);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p><strong>替代文本</strong></p>
+<p>使用/作为替代文本。如下例子可匹配I have {int} cucumber(s) in my belly和I have {int} cucumber(s) in my stomach</p>
+<figure class="highlight gherkin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">I have &#123;int&#125; cucumber(s) in my belly/stomach</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>3.0.1版本前，无法转义/，始终被解释为替代文本，3.0.1后用/转义/<br>附github<a target="_blank" rel="noopener" href="https://links.jianshu.com/go?to=https://github.com/cucumber/cucumber-jvm/blob/master/CHANGELOG.md">版本变更记录</a></p>
+<p><strong>tag</strong></p>
+<p>tag提供2个作用</p>
+<ol>
+<li>提供@before和@after的钩子（tagged-hooks）</li>
+<li>运行时只运行指定tag的用例<br>tag具有继承特性，即在Feature上标记tag，该Feature下的Scenario，step会继承该tag。</li>
+</ol>
+<figure class="highlight gherkin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@simpleDemo</span></span><br><span class="line"><span class="keyword">Feature</span>: Is it friday yet?</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<figure class="highlight gherkin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@RunWith(Cucumber.class)</span></span><br><span class="line"><span class="meta">@CucumberOptions(tags</span> = <span class="string">&quot;@simpleDemo&quot;</span>)// 指定只运行代用<span class="meta">@simpleDemo的</span></span><br><span class="line">public class CucumberTest &#123;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<figure class="highlight gherkin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Before(&quot;</span><span class="meta">@simpleDemo&quot;)</span></span><br><span class="line">public void beforeOperation() &#123;</span><br><span class="line">        </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@After(&quot;</span><span class="meta">@simpleDemo&quot;)</span></span><br><span class="line">public void afterOperation() &#123;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>测试过写两个tag，两个都会生效<br>结合Background具体的运行顺序是 before tag -&gt; Background -&gt; Scenario -&gt; after tag</p>
+<p>tips: cucumber.api.spring.SpringTransactionHooks(cucmber-spring包)提供了一个spring事务的钩子@txn，提供回滚功能。</p>
+<p><strong>IDE插件</strong></p>
+<p>IDEA <a target="_blank" rel="noopener" href="https://links.jianshu.com/go?to=https://plugins.jetbrains.com/plugin/7212-cucumber-for-java">Cucumber for Java</a></p>
+<h2 id="容易出现的错误"><a href="#容易出现的错误" class="headerlink" title="==容易出现的错误=="></a>==容易出现的错误==</h2><p>step_definition已经实现了.feature文件所有step且不警告（idea自动检测正则表达式匹配，不警告说明表达式已匹配），但测试时仍然报missing steps错误</p>
+<p><strong>解决</strong></p>
+<p>可能是因为guid路径错误，idea自动生成guid路径，但如果改变了文件名会找不到step_definition</p>
+
+      
+
+      
+        <div class="page-reward">
+          <a href="javascript:;" class="page-reward-btn tooltip-top">
+            <div class="tooltip tooltip-east">
+            <span class="tooltip-item">
+              赏
+            </span>
+            <span class="tooltip-content">
+              <span class="tooltip-text">
+                <span class="tooltip-inner">
+                  <p class="reward-p"><i class="icon icon-quo-left"></i>谢谢你请我吃糖果<i class="icon icon-quo-right"></i></p>
+                  <div class="reward-box">
+                    
+                    
+                  </div>
+                </span>
+              </span>
+            </span>
+          </div>
+          </a>
+        </div>
+      
+    </div>
+    <div class="article-info article-info-index">
       
       
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2021" class="archive-year">2021</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/01/20/%E7%BC%93%E5%AD%98/" class="archive-article-date">
-  	<time datetime="2021-01-20T03:16:57.782Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-01-20</time>
-</a>
-        </div>
-    	 
-        <div class="article-info info-on-right">
-          
-          
+      
 
+      
+
+      
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
         </div>
-        <div class="clearfix"></div>
-    </header>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//pan.baidu.com/share/qrcode?url=http://example.com/2021/01/20/cucumber/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
+      
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/01/20/%E5%93%8D%E5%BA%94%E5%BC%8F%E7%BC%96%E7%A8%8B/" class="archive-article-date">
-  	<time datetime="2021-01-20T03:16:57.767Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-01-20</time>
-</a>
-        </div>
-    	 
-        <div class="article-info info-on-right">
-          
-          
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
   
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/01/20/%E5%88%86%E5%B8%83%E5%BC%8F%E4%B8%80%E8%87%B4%E6%80%A7%E9%97%AE%E9%A2%98/" class="archive-article-date">
-  	<time datetime="2021-01-20T03:16:57.761Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-01-20</time>
-</a>
-        </div>
-    	 
-        <div class="article-info info-on-right">
-          
-          
+<nav id="article-nav">
+  
+    <a href="/2021/01/20/docker/" id="article-nav-newer" class="article-nav-link-wrap">
+      <i class="icon-circle-left"></i>
+      <div class="article-nav-title">
+        
+          (no title)
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2021/01/20/SpringCloud%E3%80%81%E5%88%86%E5%B8%83%E5%BC%8F%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title"></div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/01/20/rockermq%E5%AE%95%E6%9C%BA%E5%8F%8A%E9%87%8D%E5%A4%8D%E6%B6%88%E8%B4%B9%E9%97%AE%E9%A2%98/" class="archive-article-date">
-  	<time datetime="2021-01-20T03:16:57.756Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-01-20</time>
-</a>
-        </div>
-    	 
-        <div class="article-info info-on-right">
-          
-          
 
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
         </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/01/20/nacos/" class="archive-article-date">
-  	<time datetime="2021-01-20T03:16:57.751Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-01-20</time>
-</a>
-        </div>
-    	 
-        <div class="article-info info-on-right">
-          
-          
+        
+        
+    </div>
+</aside>
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/01/20/linux/" class="archive-article-date">
-  	<time datetime="2021-01-20T03:16:57.744Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-01-20</time>
-</a>
-        </div>
-    	 
-        <div class="article-info info-on-right">
-          
-          
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/01/20/jvm/" class="archive-article-date">
-  	<time datetime="2021-01-20T03:16:57.738Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-01-20</time>
-</a>
-        </div>
-    	 
-        <div class="article-info info-on-right">
-          
-          
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/01/20/java%E5%B9%B6%E5%8F%91%E5%9F%BA%E7%A1%80/" class="archive-article-date">
-  	<time datetime="2021-01-20T03:16:57.731Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-01-20</time>
-</a>
-        </div>
-    	 
-        <div class="article-info info-on-right">
-          
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/01/20/graphql/" class="archive-article-date">
-  	<time datetime="2021-01-20T03:16:57.723Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-01-20</time>
-</a>
-        </div>
-    	 
-        <div class="article-info info-on-right">
-          
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/01/20/flink/" class="archive-article-date">
-  	<time datetime="2021-01-20T03:16:57.716Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-01-20</time>
-</a>
-        </div>
-    	 
-        <div class="article-info info-on-right">
-          
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
   
   
-    </div></section>
   
 
-    
-    <nav id="page-nav">
-      <span class="page-number current">1</span><a class="page-number" href="/archives/page/2/">2</a><a class="page-number" href="/archives/page/3/">3</a><a class="extend next" rel="next" href="/archives/page/2/">Next &amp;raquo;</a>
-    </nav>
+  
+
+  
+
   
 
 
@@ -402,8 +409,8 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
-		isArchive: true,
+		isPost: true,
+		isArchive: false,
 		isTag: false,
 		isCategory: false,
 		open_in_new: false,

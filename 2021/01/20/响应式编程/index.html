@@ -6,13 +6,17 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://example.com">
-  <title>Archives | Hexo</title>
+  <title>Hexo</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta property="og:type" content="website">
+  <meta name="description" content="一、简介通常，人们谈到响应式可与响应式编程画等号，以 非阻塞 和 异步 的特性并述，以数据结构和操作相辅相成。 响应式编程涉及 函数式 和 并发 两种编程模型，前者关注语法特性，后者强调执行效率。简言之，响应式编程的意图在于”Less Code,More Efficient”；除此之外，响应式更大的价值在于同步和异步的实现代码无异 1. 由来JDK1.5之前，API Thread 和Runnabl">
+<meta property="og:type" content="article">
 <meta property="og:title" content="Hexo">
-<meta property="og:url" content="http://example.com/archives/index.html">
+<meta property="og:url" content="http://example.com/2021/01/20/%E5%93%8D%E5%BA%94%E5%BC%8F%E7%BC%96%E7%A8%8B/index.html">
 <meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="一、简介通常，人们谈到响应式可与响应式编程画等号，以 非阻塞 和 异步 的特性并述，以数据结构和操作相辅相成。 响应式编程涉及 函数式 和 并发 两种编程模型，前者关注语法特性，后者强调执行效率。简言之，响应式编程的意图在于”Less Code,More Efficient”；除此之外，响应式更大的价值在于同步和异步的实现代码无异 1. 由来JDK1.5之前，API Thread 和Runnabl">
 <meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2021-01-20T03:16:57.767Z">
+<meta property="article:modified_time" content="2021-01-20T03:16:57.767Z">
 <meta property="article:author" content="John Doe">
 <meta name="twitter:card" content="summary">
   
@@ -150,235 +154,291 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
-  
-  
+            <article id="post-响应式编程" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
     
-    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="一、简介"><a href="#一、简介" class="headerlink" title="一、简介"></a>一、简介</h1><p>通常，人们谈到响应式可与响应式编程画等号，以 <strong>非阻塞</strong> 和 <strong>异步</strong> 的特性并述，以数据结构和操作相辅相成。</p>
+<p>响应式编程涉及 <strong>函数式</strong> 和 <strong>并发</strong> 两种编程模型，前者关注语法特性，后者强调执行效率。简言之，响应式编程的意图在于”Less Code,More Efficient”；除此之外，响应式更大的价值在于同步和异步的实现代码无异</p>
+<h2 id="1-由来"><a href="#1-由来" class="headerlink" title="1. 由来"></a>1. 由来</h2><p>JDK1.5之前，API Thread 和Runnable 已具备异步和非阻塞的能力，但同步、异步编程的模式不统一，并且管理线程声明周期的成本均由开发人员承受</p>
+<p>JDK1.5之后，引入了JUC，包含了volatile、cas算法、原子变量、分段锁机制、并发工具类、能返回值的Callable、读写锁、Excutors线程池、阻塞队列 等并发工具减轻了开发人员的负担，但开发人员仍需要学习如何合理地设置线程池空间和阻塞队列</p>
+<p>JDK1.7之后，引入了ForkJoinPool，可伸缩地进行线程分配，不过即使是线程安全的JUC框架与响应式理念仍存在距离，并且不具备并行计算的能力(如 集合并行排序)，同时操作集合的手段也相当频发，缺少类似Map、Reduce等操作</p>
+<p>Jdk1.8之后，引入了Stream API，此时集合具备了串行和并行自由切换的能力(如sequential()和parallel()方法)，同时淡化了并发的特性(如sorted()方法既可以进行传统排序，也可以进行并行排序)，相同的设计哲学也体现在Java响应式实现框架中，统一编程模型是流的设计目标之一。</p>
+<p>Stream结合Lambda语法特性，提供了数量可观的操作方法，但无论对比RxJava，还是Reactor，流操作方法都相形见绌。值得一提，这些操作方法在响应式术语中被称为操作符</p>
+<p>从架构层面，响应式编程也是未来架构的一次升级，我们业务的主流模式是RPC和Spring MVC的同步等待机制，这里有两种优化思路  </p>
+<ol>
+<li>不需要关心接口返回值可以采用异步RPC调用 </li>
+<li>如果依赖RPC接口返回值，但多个RPC之间没有依赖关系，可以采用并行化处理</li>
+</ol>
+<p>主要实现是 线程池 异步调度，同步屏障进行一个线程进度控制，子线程的异常可以用过FutureTask来捕获，异常会在FutureTask调用get()方法时抛出。线程池不推荐Executors工厂创建，因为真实应用下，全局RPC调用都采用一个线程池，由于Exectors封装了线程池参数，不便让开发者明确运行规则，newFixedThreadPool 和 newSingleThreadExecutor容易请求处理队列堆积(工作队列使用 LinkedBlockingQueue，最大长度为整数最大值)，newCachedThreadPool 和 newScheduledThreadPool 容易创建过多线程(工作队列使用SynchornousQueue，每插入一个操作需要有另一个元素被线程移除)，导致OOM，推荐使用 new ThreadPoolExecutor()手动创建。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> INTERFACE_COUNT = <span class="number">10</span>;</span><br><span class="line">ExecutorService executorService = <span class="keyword">new</span> ThreadPoolExecutor(INTERFACE_COUNT, INTERFACE_COUNT*<span class="number">3</span>, <span class="number">10L</span>,TimeUnit.MILLISECONDS, <span class="keyword">new</span> LinkedBlockingQueue&lt;Runnable&gt;(), <span class="keyword">new</span> ThreadPoolExecutor.CallerRunsPolicy());<span class="comment">//这个拒绝策略会阻塞主线程，看业务场景替换</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">       <span class="keyword">long</span> start = System.currentTimeMillis();</span><br><span class="line">       App test = <span class="keyword">new</span> App();</span><br><span class="line">       test.test();</span><br><span class="line">       <span class="keyword">long</span> end = System.currentTimeMillis();</span><br><span class="line">       System.out.println(<span class="string">&quot;总耗时：&quot;</span>+(end-start)+<span class="string">&quot;ms&quot;</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@SuppressWarnings(&quot;unchecked&quot;)</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">test</span><span class="params">()</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">       <span class="keyword">final</span> CyclicBarrier cb = <span class="keyword">new</span> CyclicBarrier(INTERFACE_COUNT + <span class="number">1</span>);</span><br><span class="line">       <span class="keyword">final</span> ServiceInterface[] services = assembles();</span><br><span class="line">       <span class="keyword">final</span> FutureTask&lt;Integer&gt;[] futureTasks = <span class="keyword">new</span> FutureTask[INTERFACE_COUNT];</span><br><span class="line"></span><br><span class="line">       <span class="keyword">for</span> (inti = <span class="number">0</span>; i &lt; INTERFACE_COUNT; i++) &#123;</span><br><span class="line">           <span class="keyword">final</span> Integer fi = i;</span><br><span class="line">           futureTasks[i] = <span class="keyword">new</span> FutureTask&lt;Integer&gt;(<span class="keyword">new</span> Callable&lt;Integer&gt;() &#123;</span><br><span class="line"></span><br><span class="line">              <span class="meta">@Override</span></span><br><span class="line">              <span class="function"><span class="keyword">public</span> Integer <span class="title">call</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">                  <span class="keyword">try</span> &#123;</span><br><span class="line">                     returnservices[fi].service();</span><br><span class="line">                  &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">                     cb.await();</span><br><span class="line">                  &#125;</span><br><span class="line">              &#125;</span><br><span class="line">           &#125;);</span><br><span class="line">           executorService.submit(futureTasks[i]);</span><br><span class="line">       &#125;</span><br><span class="line">       String serviceName = <span class="keyword">null</span>;</span><br><span class="line"></span><br><span class="line">       <span class="keyword">try</span> &#123;</span><br><span class="line">           <span class="comment">// 打开栅栏</span></span><br><span class="line">           cb.await();</span><br><span class="line">           <span class="comment">// 如果有其他系统调用异常，则将该异常向外层抛出</span></span><br><span class="line">           <span class="keyword">for</span> (inti = <span class="number">0</span>; i &lt; INTERFACE_COUNT; i++) &#123;</span><br><span class="line">              serviceName = services[i].getName();</span><br><span class="line">              futureTasks[i].get();</span><br><span class="line">           &#125;</span><br><span class="line">       &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">           <span class="keyword">if</span> ((einstanceof ExecutionException) &amp;&amp; (e.getCause() <span class="keyword">instanceof</span> AppException)) &#123;</span><br><span class="line">              <span class="keyword">throw</span> (AppException) e.getCause();</span><br><span class="line">           &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">              <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(serviceName+<span class="string">&quot;系统异常&quot;</span>, e);</span><br><span class="line">           &#125;</span><br><span class="line">       &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">   </span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> ServiceInterface[] assembles()&#123;</span><br><span class="line">       ServiceInterface[] service = <span class="keyword">new</span> ServiceInterface[INTERFACE_COUNT];</span><br><span class="line">       <span class="keyword">for</span> (inti = <span class="number">0</span>; i &lt; INTERFACE_COUNT; i++) &#123;</span><br><span class="line">           service[i] = <span class="keyword">new</span> ServiceImpl(<span class="string">&quot;接口&quot;</span>+i);</span><br><span class="line">       &#125;</span><br><span class="line">        <span class="keyword">return</span> service;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>但是，随着业务的复杂演变，可能会出现回调地域，而且冗余的业务代码和大量的并行代码会导致程序越来越难以维护。此时，响应式编程应运而生，它通过避免等待以缩短平均响应时间来保证系统的利用率。</p>
+<h2 id="2-定义"><a href="#2-定义" class="headerlink" title="2. 定义"></a>2. 定义</h2><p><strong>从逻辑角度讲</strong></p>
+<p>响应式编程是一种基于 数据流 和 变化传递 的声明式编程范式</p>
+<p>变化传递：在命令编程下<code>a=b+c</code>，a由b和c当时的值决定，而响应式编程下，b和c的后续变化会影响到a</p>
+<p>数据流、声明式：我们把处理的数据抽象出来，然后通过api去处理数据流中的数据</p>
+<p><strong>从实现角度讲</strong></p>
+<p>是否是响应式的决定性因素在于数据是否来自于发布端的 <strong>推送</strong>，而非消费端的拉取。</p>
+<p>不过JVM语言早期的响应式定义处于模糊地带，如RxJava API 属于 观察者模式 的扩展，而非 迭代器模式的实现。而Reactor的实现则符合响应式流规范，但会存在数据的到达存在不确定性的问题，当推送的数据无法马上被消费端消费时，要求响应式框架必须提供 <strong>背压</strong> 实现，确保消费端拥有拒绝权。</p>
+<p>在此理论基础上，响应式流规范定义了一套抽象的API，作为JDK1.9中java.util.concurrent.Flow API的顶层设计</p>
+<p>但响应式流规范对操作符的部分没有定义，这也是RxJava 和 Reactor 均称自身为响应式扩展框架的原因，两者在API级别提供了多种调度器实现，可适配不同并发场景</p>
+<h2 id="3-主要好处"><a href="#3-主要好处" class="headerlink" title="3. 主要好处"></a>3. 主要好处</h2><ol>
+<li>提高程序的性能</li>
+<li>在多核机器上，提高了计算资源的利用率</li>
+<li>为异步编程提供了一个更靠谱的可维护方案</li>
+<li>提供了背压机制，对计算资源提供了过载保护功能</li>
+</ol>
+<h2 id="4-响应式开发工具库"><a href="#4-响应式开发工具库" class="headerlink" title="4. 响应式开发工具库"></a>4. 响应式开发工具库</h2><p>有很多工具库实现了响应式流的标准，包括Akka、Reactor、RxJava、Streams、Vert.x等。</p>
+<h3 id="4-1-RxJava"><a href="#4-1-RxJava" class="headerlink" title="4.1 RxJava"></a>4.1 RxJava</h3><p>RxJava是使用Java语言开发的专门针对JVM的一种响应式扩展工具。RxJava的目的就是处理客户端越来越复杂的请求，在服务器端通过该并行计算快速地响应请求。</p>
+<p>其实它就是一个观察者模式的实际体现，数据的消费者根据获得的数据做出各种反应。</p>
+<p><strong>下面对 RxJava 所涉及的要点进行解释</strong></p>
+<ul>
+<li><code>Observable</code> 表示数据源，Observable 会发出一定数量的元素，发送可能会成功，也可能在这个过程中出现状况而失败</li>
+<li><code>Observer</code> 或 <code>Subscriber</code> 表示订阅者，通过监听 Observable 来消费 Observable 所发送的元素</li>
+<li><code>Methods</code> 表示一系列操作API，对下发数据进行加工整合</li>
+<li><code>onNext</code> 在一个元素被 Observable 发送出去的时候，通过该方法可以调用每一个订阅者</li>
+<li><code>onComplete</code> 在 Observable 成功发送完所有数据后，会调用这个方法来收尾</li>
+<li><code>onError</code> 当 Observable 发送数据的过程中出现错误的状况时，会调用这个方法结算发送并返回一个error时间</li>
+</ul>
+<p><strong>RxJava所带来的好处主要如下</strong></p>
+<ul>
+<li>允许我们进行一系列的异步操作</li>
+<li>有时为了跟踪状态，我们会通过一个原子类变量保存之前计算的值。我们无须专门使用原子类来跟踪状态，因为RxJava已经封装了这些操作</li>
+<li>RxJava提供了一个在整个执行过程中发生错误时的处理途径</li>
+</ul>
+<h3 id="4-2-Reactor"><a href="#4-2-Reactor" class="headerlink" title="4.2 Reactor"></a>4.2 Reactor</h3><p>Spring 5，通过Reactor的支持，在Spring MVC 框架的整个运行过程使用了 <strong>事件驱动模型</strong>，在服务器端获得了更高的性能和更快的响应速度。Spring WebFlux作为新一代的Web开发框架，以Reactor作为基础框架进行异步编程的开发。</p>
+<p><strong>Reactor的主要优点如下</strong></p>
+<p>Reactor支持完全无阻塞，其主要的目标之一就是解决传统Web开发方案对于异步支持的各种弊病。它提供了十分有效的途径来支持背压。它还有以下优点：</p>
+<ul>
+<li>丰富的API，可以对数据流进行操作</li>
+<li>提供了一种可读性更强的代码书写方式，使我们所写的代码可以更方便地得到维护</li>
+<li>与流相同，无消费，不执行</li>
+<li>消费者具备发信号通知生产者元素按需下发的能力</li>
+</ul>
+<p><strong>Reactor核心功能</strong></p>
+<p>Reactor的主要模块是reactor-core，这是一个专门用于支持响应式流规范的类库，其支持JDK8及后续版本。通过查看 Reactor API 可知它和RxJava很像。Reactor3是Reactor2 和 RxJava的核心贡献开发者一起完成的一个混合版本。</p>
+<p>Reactor 和 RxJava 有相同的 Publisher、Subscriber、Subscription 和 Processor 核心接口。</p>
+<h3 id="4-3-WebFlux"><a href="#4-3-WebFlux" class="headerlink" title="4.3 WebFlux"></a>4.3 WebFlux</h3><p>WebFlux使用的响应式流并不是JDK9平台，而是用的上面的Reactor，Spring官网为了让我们更加快速/平滑到WebFlux上，之前SpringMVC那套还是支持的。也就是说：我们可以像使用SpringMVC一样使用着WebFlux</p>
+<p>Reactor的 发布者 用两个类来表示：</p>
+<ul>
+<li>Mono(返回0或1个元素)</li>
+<li>Flux(返回0-n个元素)</li>
+</ul>
+<p>而 订阅者 则是Spring框架去完成</p>
+<p>创建WebFlux项目时，选择depedences=&gt;Spring Reactive Web，或者引用以下包</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">     <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.boot<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">     <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-boot-starter-webflux<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">	 <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.cloud<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">	 <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-cloud-stream-reactive<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>代码示例：git clone <a target="_blank" rel="noopener" href="https://github.com/gglaochen/jdk9Learning.git">https://github.com/gglaochen/jdk9Learning.git</a></p>
+<p>ps:WebFlux默认的web容器是netty</p>
+<p>WebFlux能以固定的线程来处理高并发：Mono和Flux的数据构建是异步的</p>
+<p>WebFlux支持服务器推送(SSE-&gt;Server Send Event)</p>
+<p>代码示例：git clone <a target="_blank" rel="noopener" href="https://github.com/gglaochen/jdk9Learning.git">https://github.com/gglaochen/jdk9Learning.git</a></p>
+<h4 id="4-3-1-Mono"><a href="#4-3-1-Mono" class="headerlink" title="4.3.1 Mono"></a>4.3.1 Mono</h4><p><strong>创建流</strong></p>
+<p><code>just</code> : Mono.just(obj);    //但对象转流</p>
+<p><strong>数据信号</strong></p>
+<p><code>error</code> : Mono.error(new BaseException);  //异常信号</p>
+<p><code>empty</code> : Mono.empty();   //一个完成信号</p>
+<h4 id="4-3-2-Flux"><a href="#4-3-2-Flux" class="headerlink" title="4.3.2 Flux"></a>4.3.2 Flux</h4><p><strong>创建流</strong></p>
+<p><code>just</code> : Flux.just(obj…);  //不定参数转流</p>
+<p><code>fromArray</code> : Flux.fromArray(obj[]);  //数组转流</p>
+<p><code>fromiterable</code> : Flux.fromIterable(list|set);  //集合转流</p>
+<p><code>fromStream</code> : Flux.fromStream(list.stream()…);  //Stream流转数据流</p>
+<p><strong>数据信号</strong></p>
+<p><code>error</code> : Flux.error(new BaseException);  //异常信号</p>
+<p><code>empty</code> : Flux.empty();   //一个完成信号</p>
+<h2 id="5-响应式开发模式"><a href="#5-响应式开发模式" class="headerlink" title="5. 响应式开发模式"></a>5. 响应式开发模式</h2><p>响应式开发模式通过实践驱动的方式将各个组件连接到一起，以实现在事件发生时其他组件可以立即进行相应。</p>
+<p>相比WebSocket只是减少客户端请求的时间，响应编程可以做到只在数据更新的时候进行页面的更新显示。</p>
+<p>可以看到，响应式开发模式一般包括下面的3个步骤</p>
+<ul>
+<li>订阅事件</li>
+<li>事件的发生与传播</li>
+<li>解除订阅</li>
+</ul>
+<p>在行情页面初始化加载的时候，其中一个动作就是订阅行情价格变动的事件源，不同的响应式框架会有不同的具体方式，另外，如果事件的传播需要跨项目，</p>
+<p>而一旦Web页面关闭或者刷新，一个解除订阅的请求就会被发送至后台。</p>
+<h1 id="二、Java9中的响应式编程"><a href="#二、Java9中的响应式编程" class="headerlink" title="二、Java9中的响应式编程"></a>二、Java9中的响应式编程</h1><h2 id="1-Flow接口"><a href="#1-Flow接口" class="headerlink" title="1. Flow接口"></a>1. Flow接口</h2><p>从JDK9中可以找到java.util.concurrent.Flow类，其中所包含的接口和定义的静态方法就是用来支持Flow控制编程的，主要基于里面的Publisher、Subscriber、Subscription等接口来支持响应式编程</p>
+<table>
+<thead>
+<tr>
+<th>接口</th>
+<th>组件功能描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Publisher</td>
+<td>通过此接口来发布一个元素序列给订阅的消费者</td>
+</tr>
+<tr>
+<td>Subscriber</td>
+<td>订阅者从Publisher那里获取所需的元素来进行消费</td>
+</tr>
+<tr>
+<td>Subscription</td>
+<td>连接发布者和订阅者的中间人，订阅者请求的时候需要用到它(实现背压：订阅者告诉生产者要多少数据)</td>
+</tr>
+<tr>
+<td>Processor</td>
+<td>同时扮演了发布者和订阅者的角色</td>
+</tr>
+</tbody></table>
+<p><strong>接口下的方法</strong></p>
+<p>Subscriber</p>
+<ul>
+<li>void onSubscribe(Subscription subscription)：在给定的 Subscription 想要使用 Subscriber 其他方法的前提下，会先调这个方法来绑定订阅关系</li>
+<li>void onError(Throwable throwable)：当 Publisher 或者 Subscription 遇到了不可恢复的错误时，会调用这个方法，然后告诉发布者，后面不接收数据了</li>
+<li>void onNext(T item)：获取 Subscription 的下一个元素 包含 数据处理逻辑</li>
+<li>void onComplete：在调用这个方法后，发布者关闭了，Subscription 就不能再调用 Subscriber 的其他方法了</li>
+</ul>
+<p>Subscription</p>
+<ul>
+<li>void chancle：Subscription停止接收消息</li>
+<li>void request(long n): Subscripton 调用这个方法添加 n 个元素。如果 n 小于 0，Subscriber 将收到一个 onError信号。如果 n 等于 0，那么调用 complete 方法，否则调用 onNext(T item)方法。</li>
+</ul>
+<p><strong>简单流程</strong></p>
+<ol>
+<li>Subscriber 通过 调函数式接口Publisher::subscribe添加新的订阅，如果失败会调Subscriber::onError抛异常，否则调Subscriber::onSubscribe同时传入一个Subscription</li>
+<li>Subscriber 通过 Subscription::request请求元素</li>
+<li>Subscriber 通过 Subscriber::onNext接收元素并消费元素</li>
+<li>Subscriber 通过 Subscription::cancel来解除订阅</li>
+</ol>
+<p>代码示例：git clone <a target="_blank" rel="noopener" href="https://github.com/gglaochen/jdk9Learning.git">https://github.com/gglaochen/jdk9Learning.git</a></p>
+
+      
+
+      
+        <div class="page-reward">
+          <a href="javascript:;" class="page-reward-btn tooltip-top">
+            <div class="tooltip tooltip-east">
+            <span class="tooltip-item">
+              赏
+            </span>
+            <span class="tooltip-content">
+              <span class="tooltip-text">
+                <span class="tooltip-inner">
+                  <p class="reward-p"><i class="icon icon-quo-left"></i>谢谢你请我吃糖果<i class="icon icon-quo-right"></i></p>
+                  <div class="reward-box">
+                    
+                    
+                  </div>
+                </span>
+              </span>
+            </span>
+          </div>
+          </a>
+        </div>
+      
+    </div>
+    <div class="article-info article-info-index">
       
       
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2021" class="archive-year">2021</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/01/20/%E7%BC%93%E5%AD%98/" class="archive-article-date">
-  	<time datetime="2021-01-20T03:16:57.782Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-01-20</time>
-</a>
-        </div>
-    	 
-        <div class="article-info info-on-right">
-          
-          
+      
 
+      
+
+      
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
         </div>
-        <div class="clearfix"></div>
-    </header>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//pan.baidu.com/share/qrcode?url=http://example.com/2021/01/20/%E5%93%8D%E5%BA%94%E5%BC%8F%E7%BC%96%E7%A8%8B/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
+      
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/01/20/%E5%93%8D%E5%BA%94%E5%BC%8F%E7%BC%96%E7%A8%8B/" class="archive-article-date">
-  	<time datetime="2021-01-20T03:16:57.767Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-01-20</time>
-</a>
-        </div>
-    	 
-        <div class="article-info info-on-right">
-          
-          
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
   
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/01/20/%E5%88%86%E5%B8%83%E5%BC%8F%E4%B8%80%E8%87%B4%E6%80%A7%E9%97%AE%E9%A2%98/" class="archive-article-date">
-  	<time datetime="2021-01-20T03:16:57.761Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-01-20</time>
-</a>
-        </div>
-    	 
-        <div class="article-info info-on-right">
-          
-          
+<nav id="article-nav">
+  
+    <a href="/2021/01/20/%E7%BC%93%E5%AD%98/" id="article-nav-newer" class="article-nav-link-wrap">
+      <i class="icon-circle-left"></i>
+      <div class="article-nav-title">
+        
+          (no title)
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2021/01/20/%E5%88%86%E5%B8%83%E5%BC%8F%E4%B8%80%E8%87%B4%E6%80%A7%E9%97%AE%E9%A2%98/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title"></div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/01/20/rockermq%E5%AE%95%E6%9C%BA%E5%8F%8A%E9%87%8D%E5%A4%8D%E6%B6%88%E8%B4%B9%E9%97%AE%E9%A2%98/" class="archive-article-date">
-  	<time datetime="2021-01-20T03:16:57.756Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-01-20</time>
-</a>
-        </div>
-    	 
-        <div class="article-info info-on-right">
-          
-          
 
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
         </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/01/20/nacos/" class="archive-article-date">
-  	<time datetime="2021-01-20T03:16:57.751Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-01-20</time>
-</a>
-        </div>
-    	 
-        <div class="article-info info-on-right">
-          
-          
+        
+        
+    </div>
+</aside>
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/01/20/linux/" class="archive-article-date">
-  	<time datetime="2021-01-20T03:16:57.744Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-01-20</time>
-</a>
-        </div>
-    	 
-        <div class="article-info info-on-right">
-          
-          
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/01/20/jvm/" class="archive-article-date">
-  	<time datetime="2021-01-20T03:16:57.738Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-01-20</time>
-</a>
-        </div>
-    	 
-        <div class="article-info info-on-right">
-          
-          
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/01/20/java%E5%B9%B6%E5%8F%91%E5%9F%BA%E7%A1%80/" class="archive-article-date">
-  	<time datetime="2021-01-20T03:16:57.731Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-01-20</time>
-</a>
-        </div>
-    	 
-        <div class="article-info info-on-right">
-          
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/01/20/graphql/" class="archive-article-date">
-  	<time datetime="2021-01-20T03:16:57.723Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-01-20</time>
-</a>
-        </div>
-    	 
-        <div class="article-info info-on-right">
-          
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/01/20/flink/" class="archive-article-date">
-  	<time datetime="2021-01-20T03:16:57.716Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-01-20</time>
-</a>
-        </div>
-    	 
-        <div class="article-info info-on-right">
-          
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
   
   
-    </div></section>
   
 
-    
-    <nav id="page-nav">
-      <span class="page-number current">1</span><a class="page-number" href="/archives/page/2/">2</a><a class="page-number" href="/archives/page/3/">3</a><a class="extend next" rel="next" href="/archives/page/2/">Next &amp;raquo;</a>
-    </nav>
+  
+
+  
+
   
 
 
@@ -402,8 +462,8 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
-		isArchive: true,
+		isPost: true,
+		isArchive: false,
 		isTag: false,
 		isCategory: false,
 		open_in_new: false,

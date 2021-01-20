@@ -6,11 +6,11 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://example.com">
-  <title>Archives | Hexo</title>
+  <title>Hexo</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta property="og:type" content="website">
 <meta property="og:title" content="Hexo">
-<meta property="og:url" content="http://example.com/archives/index.html">
+<meta property="og:url" content="http://example.com/page/3/index.html">
 <meta property="og:site_name" content="Hexo">
 <meta property="og:locale" content="en_US">
 <meta property="article:author" content="John Doe">
@@ -152,232 +152,346 @@
           <div id="js-content" class="content-ll">
             
   
-  
+    <article id="post-COLA" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
     
-    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>一、COLA框架解决了哪些问题</p>
+<ul>
+<li>应用的层次结构混乱：不知道应用应该如何分层、应该包含哪些组件、组件之间的关系是什么；</li>
+<li>缺少规范的指导和约束：新加一段业务逻辑不知道放在什么地方（哪个类，哪个包）、应该起什么名字比较合适？</li>
+</ul>
+<p>二、COLA2.0中的组件</p>
+<p>模块和组件的定义</p>
+<p>模块（Module）： 和Maven中Module定义保持一致，简单理解就是Jar。</p>
+<p>组件（Component）：和UML中的定义类似，简单理解就是Package。</p>
+<p>cola中模块和组件的关系</p>
+<ol>
+<li>Client二方库模块<ul>
+<li>api:存放的是应用对外的接口</li>
+<li>dto.domainmodel：用来做数据传输的轻量级领域对象</li>
+<li>dto.domainevent: 用来做数据传输的领域事件</li>
+</ul>
+</li>
+<li>Application模块<ul>
+<li>service：接口实现的facade，没有业务逻辑，可以包含对不同终端的adapter</li>
+<li>eventhandler：处理领域事件，包括本域的和外域的</li>
+<li>executor：用来处理命令（Command）和查询（Query），对复杂业务，可以包含Phase和Step</li>
+<li>interceptor: COLA提供的对所有请求的AOP处理机制</li>
+</ul>
+</li>
+<li>Domain模块<ul>
+<li>domain：领域实体，允许继承domainmodel</li>
+<li>domainservice: 领域服务，用来提供更粗粒度的领域能力</li>
+<li>gateway：对外依赖的网关接口，包括存储、RPC、Search等</li>
+</ul>
+</li>
+<li>Infrastructure<ul>
+<li>config：配置信息相关</li>
+<li>message：消息处理相关</li>
+<li>repository：存储相关，是gateway的特化，主要用来做本域的数据CRUD操作</li>
+<li>gateway：对外依赖的网关接口（Domain里的gateway）的实现</li>
+</ul>
+</li>
+</ol>
+<p>三、COLA中业务定位的设计</p>
+<p>业务身份的三个概念：</p>
+<ol>
+<li>业务就是一个自负盈亏的财务主体，比如tmall、淘宝和零售通就是三个不同的业务。</li>
+<li>用例描述了用户和系统之间的互动，每个用例提供了一个或多个场景。比如，支付订单就是一个典型的用例</li>
+<li>场景场景也被称为用例的实例（Instance），包括用例所有的可能情况（正常的和异常的）。比如对于“订单支付”这个用例，就有“可以使用花呗”，“支付宝余额不足”，“银行账户余额不足”等多个场景</li>
+</ol>
+<p>四、项目结构及请求流程</p>
+<ol>
+<li>项目结构</li>
+</ol>
+<p>cola-framework</p>
+<pre><code>cola-common
+
+cola-core
+
+cola-test</code></pre>
+<p>sample</p>
+<pre><code>app-&gt;client、domain
+
+client-&gt;cola-common（可以定义在cola-framework中）
+
+controller-&gt;app、cola-test
+
+domain-&gt;infrastructure、client、cola-test
+
+infrastructure-&gt;cola-core、cola-test
+
+start-&gt;controller、cola-test</code></pre>
+<ol start="2">
+<li><p>请求流程</p>
+</li>
+<li><p>controller中调用client中的接口</p>
+</li>
+<li><p>接口在app中@Service注解下实现(发送消息到命令总线)</p>
+</li>
+<li><p>app中从命令总线读取命令执行（需要实现CommandExecutorI接口并加@Command注解）</p>
+</li>
+<li><p>app执行命令时</p>
+<ul>
+<li>对于复杂业务可以多抽离一层Repository层</li>
+<li>调用infrastructure中持久层/rpc层操作接口Tunnel</li>
+<li>调用domain实体的方法进行领域内操作</li>
+<li>调用infrastructure中DomainEventPublisher将事件发布到事件总线</li>
+<li>事件总线中的消息在app@EventHandler标注的事件处理器中处理<ul>
+<li>处理时需要调用client中Service方法(实现方法同样在app中，执行发送命令)</li>
+<li>对于简单业务可以直接调用infrastructure中Tunnel</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<p>命令总线和事件总线发布方和处理方的绑定关系通过参数来区分，两个总线的区别是 命令总线是同步的，而事件总线是异步的。</p>
+<p>五、实体类定义位置及用法</p>
+<p>六、注解使用</p>
+<p>七、COLA项目初始化流程</p>
+<ol>
+<li>在infrastructure中定义初始化配置：注册一个Bootstrap Bean，定义扫描的包路径在groupId</li>
+<li>调用Bootstrap的初始化方法init();<ul>
+<li>init方法先执行包扫描，获取当前包路径下所有子路径，判断文件是否是文件夹，文件夹则迭代调用包扫描方法；如果是文件则将完整的文件路径保存到Set中</li>
+<li>再执行注册bean，判断Set里的类是否有PreInterceptor(前置拦截器)、PostInterceptor(后置拦截器)、Command(命令)、Extension(拓展点)、EventHandler(事件处理器)注解标注，如果有就返回对应的注册器，执行注册</li>
+<li>注册到CommandHub（包含全局前置过滤器list,全局后置过滤器list,命令调用map,命令返回类map）<ul>
+<li>命令将&lt;Class<Command>,Class<Response>&gt;作为一个map项放入responseRepository中然后创建一个命令调用类，设置执行器为类本身，前置拦截器和后置拦截器，将命令类作为key，命令调用类作为value,放入commandRepository中</li>
+<li>前置过滤器、后置过滤器添加到对应的list中</li>
+</ul>
+</li>
+<li>注册到EventHub（包含事件调用map,事件返回类map(空)）<ul>
+<li>事件将&lt;Class<DomainEvent>,Class<EventHandler>&gt;存入eventRepository中</li>
+</ul>
+</li>
+<li>注册到ExtensionRepository(包含拓展点map)<ul>
+<li>拓展点将</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<p>八、模块详解</p>
+<ol>
+<li>Client二方库模块</li>
+</ol>
+<p>关于二方库的定位表面上来看，是一个简单问题，因为服务的二方库无外乎就是用来暴露接口和传递数据的DTO。不过，往深层次思考，它并不是一个简单的问题，因为它涉及到不同界限上下文（Bounded Context）之间的协作问题。</p>
+<p>如何实现不同域之间的协作，同时又要保证各自领域的概念的完整性？</p>
+<ol>
+<li>共享内核<br>优点：减少重复建设<br>缺点：团队之间紧耦合</li>
+<li>防腐层（ACL）<br>下游和上游之间创建一层转换层<br>优点：完全解耦，各自独立<br>缺点：有一定的转换成本</li>
+</ol>
+<p>二方库的职责范围是什么？</p>
+<ol>
+<li>二方库中的domain model也是领域的重要组成部分</li>
+<li>在Domain层，可以适当考虑继承二方库中的领域能力，可以继承也可以Wrap</li>
+</ol>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
       
       
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2021" class="archive-year">2021</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/01/20/%E7%BC%93%E5%AD%98/" class="archive-article-date">
-  	<time datetime="2021-01-20T03:16:57.782Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-01-20</time>
-</a>
-        </div>
-    	 
-        <div class="article-info info-on-right">
-          
-          
+      
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2021/01/20/COLA/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/01/20/%E5%93%8D%E5%BA%94%E5%BC%8F%E7%BC%96%E7%A8%8B/" class="archive-article-date">
-  	<time datetime="2021-01-20T03:16:57.767Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-01-20</time>
-</a>
-        </div>
-    	 
-        <div class="article-info info-on-right">
-          
-          
 
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
         </div>
-        <div class="clearfix"></div>
-    </header>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
+    <article id="post-Arthas" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="一、Arthas能做什么"><a href="#一、Arthas能做什么" class="headerlink" title="一、Arthas能做什么"></a>一、Arthas能做什么</h1><p>Arthas 是 阿里巴巴最近开源出来的一个针对 java 的工具，主要是针对 java 的问题进行诊断</p>
+<p>这个工具可以协助你做下面这些事情：</p>
+<ol>
+<li>这个类是从哪个 jar 包加载而来的？</li>
+<li>为什么会报各种类相关的 Exception？</li>
+<li>线上遇到问题无法 debug 好蛋疼，难道只能反复通过增加 System.out 或通过加日志再重新发布吗？</li>
+<li>线上的代码为什么没有执行到这里？是由于代码没有 commit？还是搞错了分支？</li>
+<li>线上遇到某个用户的数据处理有问题，但线上同样无法 debug，线下无法重现！</li>
+<li>是否有一个全局视角来查看系统的运行状况？</li>
+<li>有什么办法可以监控到JVM的实时运行状态？</li>
+</ol>
+<h1 id="二、安装及启用方式"><a href="#二、安装及启用方式" class="headerlink" title="二、安装及启用方式"></a>二、安装及启用方式</h1><h2 id="1-windows"><a href="#1-windows" class="headerlink" title="1. windows"></a>1. windows</h2><p>适合本地开发环境下使用</p>
+<ol>
+<li><p>下载</p>
+<blockquote>
+<p><a target="_blank" rel="noopener" href="http://search.maven.org/classic/#search%7Cga%7C1%7Cg%3A%22com.taobao.arthas%22%20AND%20a%3A%22arthas-packaging%22">http://search.maven.org/classic/#search%7Cga%7C1%7Cg%3A%22com.taobao.arthas%22%20AND%20a%3A%22arthas-packaging%22</a></p>
+</blockquote>
+</li>
+<li><p>解压后在安装目录中启动cmd</p>
+</li>
+<li><p>输入<code>jps</code>查看运行中的java进程</p>
+</li>
+<li><p>输入<code>as.bat &lt;pid&gt;</code>进入该java进程的监控终端</p>
+</li>
+</ol>
+<h2 id="2-Linux"><a href="#2-Linux" class="headerlink" title="2. Linux"></a>2. Linux</h2><p>适合生产环境下使用</p>
+<ol>
+<li><p>下载</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">wget https://alibaba.github.io/arthas/arthas-boot.jar</span><br><span class="line"></span><br><span class="line">java -jar arthas-boot.jar --repo-mirror aliyun --use-http</span><br></pre></td></tr></table></figure></li>
+<li><p>输入<code>jps</code>查看运行中的java进程</p>
+</li>
+<li><p>输入<code>./as.sh &lt;pid&gt;</code>进入该java进程的监控终端</p>
+</li>
+</ol>
+<h2 id="3-docker-amp-k8s"><a href="#3-docker-amp-k8s" class="headerlink" title="3. docker&amp;k8s"></a>3. docker&amp;k8s</h2><ol>
+<li><p>启动<code>arthas-demo</code>容器</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run --name arthas-demo -it hengyunabc/arthas:latest /bin/sh -c &quot;java -jar /opt/arthas/arthas-demo.jar&quot;</span><br></pre></td></tr></table></figure></li>
+<li><p>启动<code>arthas-boot</code>来进行诊断</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker exec -it arthas-demo /bin/sh -c &quot;java -jar /opt/arthas/arthas-boot.jar&quot;</span><br></pre></td></tr></table></figure></li>
+<li><p>诊断docker里的java进程</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker exec -it  $&#123;containerId&#125; /bin/bash -c &quot;wget https://alibaba.github.io/arthas/arthas-boot.jar &amp;&amp; java -jar arthas-boot.jar&quot;</span><br></pre></td></tr></table></figure></li>
+<li><p>诊断k8s里容器的java进程</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl exec -it $&#123;pod&#125; --container $&#123;containerId&#125; -- /bin/bash -c &quot;wget https://alibaba.github.io/arthas/arthas-boot.jar &amp;&amp; java -jar arthas-boot.jar&quot;</span><br></pre></td></tr></table></figure>
+<p>由于Kubernetes容器环境中因为精简了jre运行时环境导致jdk很多功能受限了，arthas-boot依赖完整的jdk功能，所以需要下载完整的JDK到本地</p>
+</li>
+</ol>
+<h1 id="三、关键实现技术"><a href="#三、关键实现技术" class="headerlink" title="三、关键实现技术"></a>三、关键实现技术</h1><p>attach:jdk1.6新增功能，通过attach机制，可以在jvm运行中，通过pid关联应用</p>
+<p>instrument：jdk1.5新增功能，通过instrument俗称javaagent技术，可以修改jvm加载的字节码</p>
+<h1 id="四、常用场景"><a href="#四、常用场景" class="headerlink" title="四、常用场景"></a>四、常用场景</h1><h2 id="1-dashboard-jvm监控"><a href="#1-dashboard-jvm监控" class="headerlink" title="1. dashboard jvm监控"></a>1. dashboard jvm监控</h2><p><code>dashboard</code></p>
+<p>显示当前系统的实时数据面板，包含：</p>
+<ul>
+<li>线程：线程id、线程名、所属组别、优先级、线程状态、CPU占用百分比、是否可中断、是否守护线程</li>
+<li>内存使用情况：堆内存（年轻代、生存区、老年代）、非堆内存（代码缓存区、元数据区）</li>
+<li>GC:垃圾回收次数、垃圾回收时间、标记-清除算法次数、标记-清除算法消耗时间</li>
+</ul>
+<p>ctrl+c退出监控</p>
+<h2 id="2-jad-类反编译"><a href="#2-jad-类反编译" class="headerlink" title="2. jad 类反编译"></a>2. jad 类反编译</h2><p><code>jad &lt;类路径&gt;</code></p>
+<p>显示对应的类信息，包含：</p>
+<ul>
+<li>该类的类加载器</li>
+<li>类所在位置（maven引入的类无法找到对应的jar包）</li>
+<li>类源代码</li>
+</ul>
+<h2 id="3-monitor-方法监控"><a href="#3-monitor-方法监控" class="headerlink" title="3. monitor 方法监控"></a>3. monitor 方法监控</h2><p><code>monitor -c 5 &lt;方法所在类路径&gt; &lt;方法名&gt;</code></p>
+<p>5秒一次刷新查看方法执行信息：</p>
+<ul>
+<li>时间戳</li>
+<li>方法所在类路径</li>
+<li>方法名</li>
+<li>总执行次数</li>
+<li>成功次数</li>
+</ul>
+<h2 id="4-tt-方法调用信息"><a href="#4-tt-方法调用信息" class="headerlink" title="4. tt 方法调用信息"></a>4. tt 方法调用信息</h2><p><code>tt -t &lt;方法所在类路径&gt; &lt;方法名&gt;</code></p>
+<p>记录方法调用信息，支持事后查看方法调用的参数，返回值，抛出的异常等信息,显示的信息包括：</p>
+<ul>
+<li>时间戳</li>
+<li>方法执行时长</li>
+<li>是否执行成功</li>
+<li>方法所在类路径</li>
+<li>方法名</li>
+</ul>
+<h2 id="5-watch-查看错误方法的入参和结果"><a href="#5-watch-查看错误方法的入参和结果" class="headerlink" title="5. watch 查看错误方法的入参和结果"></a>5. watch 查看错误方法的入参和结果</h2><p><code>watch &lt;方法所在类路径&gt; &lt;方法名&gt; &#123;params[0], throwExp&#125; -e</code></p>
+<p>记录错误执行的方法的入参和返回结果，还原错误场景（只显示错误方法信息），显示的信息报错：</p>
+<ul>
+<li>时间戳</li>
+<li>方法执行时长</li>
+<li>入参及类型</li>
+<li>抛出的异常及异常信息</li>
+</ul>
+<h2 id="6-trace-查看一次调用涉及子方法的执行时长"><a href="#6-trace-查看一次调用涉及子方法的执行时长" class="headerlink" title="6. trace 查看一次调用涉及子方法的执行时长"></a>6. trace 查看一次调用涉及子方法的执行时长</h2><p><code>trace &lt;方法所在类路径&gt; &lt;方法名&gt;</code></p>
+<p>观察方法执行的时候哪个子调用比较慢，最慢的一个方法将标红，显示的信息包括：</p>
+<ul>
+<li>时间戳</li>
+<li>执行的方法</li>
+<li>方法花费的时间</li>
+</ul>
+<h2 id="7-redefine-排查奇怪日志来源"><a href="#7-redefine-排查奇怪日志来源" class="headerlink" title="7. redefine 排查奇怪日志来源"></a>7. redefine 排查奇怪日志来源</h2><ul>
+<li><p>由于日志是基于SpringBuilder的所以重写它的toString()方法</p>
+</li>
+<li><p>判断是否包含奇怪日志内容，包含则抛异常输出当前栈</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">toString</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    String result = <span class="keyword">new</span> String(value, <span class="number">0</span>, count);</span><br><span class="line">    <span class="keyword">if</span>(result.contains(<span class="string">&quot;======UserName:&quot;</span>)) &#123;</span><br><span class="line">           System.err.println(result);</span><br><span class="line">           <span class="keyword">new</span> Throwable().printStackTrace();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li><p>编译重写的StringBuilder.java方法生产.class文件</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">javac StringBuilder.java</span><br></pre></td></tr></table></figure></li>
+<li><p>使用readfine重新加载外部class文件替换jvm已加载的类</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">redefine -p /tmp/StringBuilder.class</span><br></pre></td></tr></table></figure>
+<p>也可以结合jad(反编译)/mc(编译)实现在线项目的代码更新，但其直接修改线上产品编译代码会导致和git仓库代码不一致的情况，一般使用jenkins。</p>
+</li>
+</ul>
+<h1 id="五、其他命令"><a href="#五、其他命令" class="headerlink" title="五、其他命令"></a>五、其他命令</h1><h2 id="1-基本命令"><a href="#1-基本命令" class="headerlink" title="1. 基本命令"></a>1. 基本命令</h2><p>help——查看命令帮助信息<br>cls——清空当前屏幕区域<br>session——查看当前会话的信息<br>reset——重置增强类，将被 Arthas 增强过的类全部还原，Arthas 服务端关闭时会重置所有增强过的类<br>version——输出当前目标 Java 进程所加载的 Arthas 版本号<br>quit——退出当前 Arthas 客户端，其他 Arthas 客户端不受影响<br>shutdown——关闭 Arthas 服务端，所有 Arthas 客户端全部退出<br>keymap——Arthas快捷键列表及自定义快捷键</p>
+<h2 id="2-jvm相关"><a href="#2-jvm相关" class="headerlink" title="2. jvm相关"></a>2. jvm相关</h2><p>dashboard——当前系统的实时数据面板<br>thread——查看当前 JVM 的线程堆栈信息<br>jvm——查看当前 JVM 的信息<br>sysprop——查看和修改JVM的系统属性<br>New! getstatic——查看类的静态属性</p>
+<h2 id="3-class-classloader相关"><a href="#3-class-classloader相关" class="headerlink" title="3. class/classloader相关"></a>3. class/classloader相关</h2><p> sc——查看JVM已加载的类信息<br>sm——查看已加载类的方法信息<br>dump——dump 已加载类的 byte code 到特定目录<br>redefine——加载外部的.class文件，redefine到JVM里<br>jad——反编译指定已加载类的源码<br>classloader——查看classloader的继承树，urls，类加载信息，使用classloader去getResource</p>
+<h2 id="4-monitor-watch-trace相关"><a href="#4-monitor-watch-trace相关" class="headerlink" title="4. monitor/watch/trace相关"></a>4. monitor/watch/trace相关</h2><p>这些命令，都通过字节码增强技术来实现的，会在指定类的方法中插入一些切面来实现数据统计和观测，因此诊断结束要执行 <code>shutdown</code> 或将增强过的类执行 <code>reset</code> 命令。</p>
+<p>monitor——方法执行监控<br>watch——方法执行数据观测<br>trace——方法内部调用路径，并输出方法路径上的每个节点上耗时<br>stack——输出当前方法被调用的调用路径<br>tt——方法执行数据的时空隧道，记录下指定方法每次调用的入参和返回信息，并能对这些不同的时间下调用进行观测</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2021/01/20/Arthas/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/01/20/%E5%88%86%E5%B8%83%E5%BC%8F%E4%B8%80%E8%87%B4%E6%80%A7%E9%97%AE%E9%A2%98/" class="archive-article-date">
-  	<time datetime="2021-01-20T03:16:57.761Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-01-20</time>
-</a>
-        </div>
-    	 
-        <div class="article-info info-on-right">
-          
-          
 
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
         </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/01/20/rockermq%E5%AE%95%E6%9C%BA%E5%8F%8A%E9%87%8D%E5%A4%8D%E6%B6%88%E8%B4%B9%E9%97%AE%E9%A2%98/" class="archive-article-date">
-  	<time datetime="2021-01-20T03:16:57.756Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-01-20</time>
-</a>
-        </div>
-    	 
-        <div class="article-info info-on-right">
-          
-          
+        
+        
+    </div>
+</aside>
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/01/20/nacos/" class="archive-article-date">
-  	<time datetime="2021-01-20T03:16:57.751Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-01-20</time>
-</a>
-        </div>
-    	 
-        <div class="article-info info-on-right">
-          
-          
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/01/20/linux/" class="archive-article-date">
-  	<time datetime="2021-01-20T03:16:57.744Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-01-20</time>
-</a>
-        </div>
-    	 
-        <div class="article-info info-on-right">
-          
-          
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/01/20/jvm/" class="archive-article-date">
-  	<time datetime="2021-01-20T03:16:57.738Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-01-20</time>
-</a>
-        </div>
-    	 
-        <div class="article-info info-on-right">
-          
-          
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/01/20/java%E5%B9%B6%E5%8F%91%E5%9F%BA%E7%A1%80/" class="archive-article-date">
-  	<time datetime="2021-01-20T03:16:57.731Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-01-20</time>
-</a>
-        </div>
-    	 
-        <div class="article-info info-on-right">
-          
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/01/20/graphql/" class="archive-article-date">
-  	<time datetime="2021-01-20T03:16:57.723Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-01-20</time>
-</a>
-        </div>
-    	 
-        <div class="article-info info-on-right">
-          
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/01/20/flink/" class="archive-article-date">
-  	<time datetime="2021-01-20T03:16:57.716Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-01-20</time>
-</a>
-        </div>
-    	 
-        <div class="article-info info-on-right">
-          
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
   
   
-    </div></section>
-  
-
-    
     <nav id="page-nav">
-      <span class="page-number current">1</span><a class="page-number" href="/archives/page/2/">2</a><a class="page-number" href="/archives/page/3/">3</a><a class="extend next" rel="next" href="/archives/page/2/">Next &amp;raquo;</a>
+      <a class="extend prev" rel="prev" href="/page/2/">&amp;laquo; Prev</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span>
     </nav>
   
 
@@ -401,9 +515,9 @@
     <script>
 	var yiliaConfig = {
 		mathjax: false,
-		isHome: false,
+		isHome: true,
 		isPost: false,
-		isArchive: true,
+		isArchive: false,
 		isTag: false,
 		isCategory: false,
 		open_in_new: false,

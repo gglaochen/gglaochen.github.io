@@ -6,15 +6,21 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://example.com">
-  <title>Archives | Hexo</title>
+  <title>Hexo</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta property="og:type" content="website">
+  <meta name="description" content="一、Elastic Job1. 简介任务调度就是将一个任务套上一个时间，让该任务可以在时间规律上去循环执行。一般的技术quartz、spring task、java.util.Timer，这几种如果在单一机器上跑其实问题不大，但是如果一旦应用于集群环境做分布式部署，就会带来一个致命的问题，那就是重复执行，当然解决方案有，但是必须依赖数据库，将任务执行状态持久化下来。所以当当就把quartz和zoo">
+<meta property="og:type" content="article">
 <meta property="og:title" content="Hexo">
-<meta property="og:url" content="http://example.com/archives/index.html">
+<meta property="og:url" content="http://example.com/2021/01/20/ElasticJob%E3%80%81xxl-job/index.html">
 <meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="一、Elastic Job1. 简介任务调度就是将一个任务套上一个时间，让该任务可以在时间规律上去循环执行。一般的技术quartz、spring task、java.util.Timer，这几种如果在单一机器上跑其实问题不大，但是如果一旦应用于集群环境做分布式部署，就会带来一个致命的问题，那就是重复执行，当然解决方案有，但是必须依赖数据库，将任务执行状态持久化下来。所以当当就把quartz和zoo">
 <meta property="og:locale" content="en_US">
+<meta property="og:image" content="d:/Typora/resources/app/asserts/icon/1138295-20181023181705162-608152688.png">
+<meta property="article:published_time" content="2021-01-20T03:16:57.637Z">
+<meta property="article:modified_time" content="2021-01-20T03:16:57.637Z">
 <meta property="article:author" content="John Doe">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="d:/Typora/resources/app/asserts/icon/1138295-20181023181705162-608152688.png">
   
     <link rel="alternative" href="/atom.xml" title="Hexo" type="application/atom+xml">
   
@@ -150,235 +156,320 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
-  
-  
+            <article id="post-ElasticJob、xxl-job" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
     
-    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="一、Elastic-Job"><a href="#一、Elastic-Job" class="headerlink" title="一、Elastic Job"></a>一、Elastic Job</h1><h2 id="1-简介"><a href="#1-简介" class="headerlink" title="1. 简介"></a>1. 简介</h2><p>任务调度就是将一个任务套上一个时间，让该任务可以在时间规律上去循环执行。一般的技术quartz、spring task、java.util.Timer，这几种如果在单一机器上跑其实问题不大，但是如果一旦应用于集群环境做分布式部署，就会带来一个致命的问题，那就是重复执行，当然解决方案有，但是必须依赖数据库，将任务执行状态持久化下来。所以当当就把quartz和zookeeper结合起来达到分布式调度，并且添加其他功能，形成了elastic-job。</p>
+<p>elastic-job 是由当当网基于quartz 二次开发之后的分布式调度解决方案 ， 由两个相对独立的子项目Elastic-Job-Lite和Elastic-Job-Cloud组成 。<br> elastic-job主要的设计理念是无中心化的分布式定时调度框架，思路来源于Quartz的基于数据库的高可用方案。但数据库没有分布式协调功能，所以在高可用方案的基础上增加了弹性扩容和数据分片的思路，以便于更大限度的利用分布式服务器的资源。</p>
+<h2 id="2-功能列表"><a href="#2-功能列表" class="headerlink" title="2. 功能列表"></a>2. 功能列表</h2><ul>
+<li>分布式调度协调 </li>
+<li>弹性扩容缩容 </li>
+<li>失效转移</li>
+<li>错过执行作业重触发</li>
+<li>作业分片一致性，保证同一分片在分布式环境中仅一个执行实例</li>
+<li>自诊断并修复分布式不稳定造成的问题 </li>
+<li>支持并行调度 </li>
+<li>支持作业生命周期操作 </li>
+<li>丰富的作业类型 </li>
+<li>Spring整合以及命名空间提供</li>
+<li>运维平台</li>
+</ul>
+<h2 id="3-常用场景"><a href="#3-常用场景" class="headerlink" title="3. 常用场景"></a>3. 常用场景</h2><ul>
+<li>保证定时任务只在集群的某一个节点上执行 </li>
+<li>一个任务拆分为多个独立的任务项，由分布式的机器去分别执行 </li>
+<li>众多的定时任务如何统一管理 </li>
+</ul>
+<h2 id="4-使用方式"><a href="#4-使用方式" class="headerlink" title="4. 使用方式"></a>4. 使用方式</h2><ol>
+<li><p>添加Maven依赖</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">     <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.dangdang<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">     <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>elastic-job-lite-spring<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">     <span class="tag">&lt;<span class="name">version</span>&gt;</span>2.1.5<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">     <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>elastic-job-lite-core<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">     <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.dangdang<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">     <span class="tag">&lt;<span class="name">version</span>&gt;</span>2.1.5<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure></li>
+<li><p>定义Zookeeper注册中心</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ElasticRegCenterConfig</span> </span>&#123;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 配置zookeeper</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> serverList</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> namespace</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Bean(initMethod = &quot;init&quot;)</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> ZookeeperRegistryCenter <span class="title">regCenter</span><span class="params">(</span></span></span><br><span class="line"><span class="function"><span class="params">            <span class="meta">@Value(&quot;$&#123;regCenter.serverList&#125;&quot;)</span> <span class="keyword">final</span> String serverList,</span></span></span><br><span class="line"><span class="function"><span class="params">            <span class="meta">@Value(&quot;$&#123;regCenter.namespace&#125;&quot;)</span> <span class="keyword">final</span> String namespace)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> ZookeeperRegistryCenter(<span class="keyword">new</span> ZookeeperConfiguration(serverList, namespace));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li><p>定义Job</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SimpleJobDemo</span> <span class="keyword">implements</span> <span class="title">SimpleJob</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">execute</span><span class="params">(ShardingContext shardingContext)</span> </span>&#123;</span><br><span class="line">        System.out.println(String.format(<span class="string">&quot;------Thread ID: %s, 任務總片數: %s, &quot;</span> +</span><br><span class="line">                        <span class="string">&quot;当前分片項: %s.当前參數: %s,&quot;</span> +</span><br><span class="line">                        <span class="string">&quot;当前任務名稱: %s.当前任務參數: %s&quot;</span></span><br><span class="line">                ,</span><br><span class="line">                Thread.currentThread().getId(),</span><br><span class="line">                shardingContext.getShardingTotalCount(),</span><br><span class="line">                shardingContext.getShardingItem(),</span><br><span class="line">                shardingContext.getShardingParameter(),</span><br><span class="line">                shardingContext.getJobName(),</span><br><span class="line">                shardingContext.getJobParameter()</span><br><span class="line"></span><br><span class="line">        ));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li><p>定义任务监听器，统计每次任务执行时间</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MyElasticJobListener</span> <span class="keyword">implements</span> <span class="title">ElasticJobListener</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> Logger logger = LoggerFactory.getLogger(MyElasticJobListener.class);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">long</span> beginTime = <span class="number">0</span>;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">beforeJobExecuted</span><span class="params">(ShardingContexts shardingContexts)</span> </span>&#123;</span><br><span class="line">        beginTime = System.currentTimeMillis();</span><br><span class="line"></span><br><span class="line">        logger.info(<span class="string">&quot;===&gt;&#123;&#125; JOB BEGIN TIME: &#123;&#125; &lt;===&quot;</span>,shardingContexts.getJobName(), TimeUtil.mill2Time(beginTime));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">afterJobExecuted</span><span class="params">(ShardingContexts shardingContexts)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">long</span> endTime = System.currentTimeMillis();</span><br><span class="line">        logger.info(<span class="string">&quot;===&gt;&#123;&#125; JOB END TIME: &#123;&#125;,TOTAL CAST: &#123;&#125; &lt;===&quot;</span>,shardingContexts.getJobName(), TimeUtil.mill2Time(endTime), endTime - beginTime);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li><p>配置JobConfig，配置Job随容器一起启动</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ElasticJobConfig</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    <span class="keyword">private</span> ZookeeperRegistryCenter regCenter;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 配置任务监听器</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> ElasticJobListener <span class="title">elasticJobListener</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> MyElasticJobListener();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 配置任务详细信息</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> jobClass</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> cron</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> shardingTotalCount</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> shardingItemParameters</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> LiteJobConfiguration <span class="title">getLiteJobConfiguration</span><span class="params">(<span class="keyword">final</span> Class&lt;? extends SimpleJob&gt; jobClass,</span></span></span><br><span class="line"><span class="function"><span class="params">                                                         <span class="keyword">final</span> String cron,</span></span></span><br><span class="line"><span class="function"><span class="params">                                                         <span class="keyword">final</span> <span class="keyword">int</span> shardingTotalCount,</span></span></span><br><span class="line"><span class="function"><span class="params">                                                         <span class="keyword">final</span> String shardingItemParameters)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> LiteJobConfiguration.newBuilder(<span class="keyword">new</span> SimpleJobConfiguration(</span><br><span class="line">                JobCoreConfiguration.newBuilder(jobClass.getName(), cron, shardingTotalCount)</span><br><span class="line">                        .shardingItemParameters(shardingItemParameters).build()</span><br><span class="line">                , jobClass.getCanonicalName())</span><br><span class="line">        ).overwrite(<span class="keyword">true</span>).build();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="meta">@Bean(initMethod = &quot;init&quot;)</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> JobScheduler <span class="title">simpleJobScheduler</span><span class="params">(<span class="keyword">final</span> SimpleJobDemo simpleJob,</span></span></span><br><span class="line"><span class="function"><span class="params">                                           <span class="meta">@Value(&quot;$&#123;stockJob.cron&#125;&quot;)</span> <span class="keyword">final</span> String cron,</span></span></span><br><span class="line"><span class="function"><span class="params">                                           <span class="meta">@Value(&quot;$&#123;stockJob.shardingTotalCount&#125;&quot;)</span> <span class="keyword">final</span> <span class="keyword">int</span> shardingTotalCount,</span></span></span><br><span class="line"><span class="function"><span class="params">                                           <span class="meta">@Value(&quot;$&#123;stockJob.shardingItemParameters&#125;&quot;)</span> <span class="keyword">final</span> String shardingItemParameters)</span> </span>&#123;</span><br><span class="line">        MyElasticJobListener elasticJobListener = <span class="keyword">new</span> MyElasticJobListener();</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> SpringJobScheduler(simpleJob, regCenter,</span><br><span class="line">                getLiteJobConfiguration(simpleJob.getClass(), cron, shardingTotalCount, shardingItemParameters),</span><br><span class="line">                elasticJobListener);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>配置文件：</p>
+</li>
+</ol>
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">server.port</span>=<span class="string">$&#123;random.int[10000,19999]&#125;</span></span><br><span class="line"><span class="meta">regCenter.serverList</span> = <span class="string">localhoost:2181</span></span><br><span class="line"><span class="meta">regCenter.namespace</span> = <span class="string">elastic-job-lite-springboot</span></span><br><span class="line"></span><br><span class="line"><span class="meta">stockJob.cron</span> = <span class="string">0/5 * * * * ?</span></span><br><span class="line"><span class="meta">stockJob.shardingTotalCount</span> = <span class="string">4</span></span><br><span class="line"><span class="meta">stockJob.shardingItemParameters</span> = <span class="string">0=0,1=1,2=0,3=1</span></span><br></pre></td></tr></table></figure>
+<p>启动项目输出：</p>
+<p><img src="D:\Typora\resources\app\asserts\icon\1138295-20181023181705162-608152688.png" alt="1138295-20181023181705162-608152688"></p>
+<p> 大家可以仔细的观察下配置文件和输出的对应关系。</p>
+<p>假设我先有这样的需求:</p>
+<p><code>定时任务在两台主机上A,B同时运行.A处理id是奇数的数据，B处理Id为偶数的数据</code></p>
+<p>用传统的定时任务例如@Schedule注解能实现么？那当然是可以，直接写死硬编码即可。用Elastic-Job的话，则相当灵活，示例如下 :</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">DbQueryJob</span> <span class="keyword">implements</span> <span class="title">SimpleJob</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    <span class="keyword">private</span> XXXDao xxxDao;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">execute</span><span class="params">(ShardingContext shardingContext)</span> </span>&#123;</span><br><span class="line">        String shardingParameter = shardingContext.getShardingParameter();</span><br><span class="line">        <span class="comment">//mod是对id取余后的结果</span></span><br><span class="line">        List&lt;xxx&gt; xxxlists=xxxDao.select(<span class="string">&quot;select * from table where mod=&quot;</span>+shardingParameter);</span><br><span class="line">        xxxlists.forEach(x-&gt;&#123;</span><br><span class="line">            System.out.println(<span class="string">&quot;参数：&quot;</span>+shardingContext.getShardingParameter()+<span class="string">&quot;状态&quot;</span>+x.getStatus());</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>稍微讲下原理</p>
+<p>Elastic-Job默认采用平均分片策略</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">如果有3台服务器，分成9片，则每台服务器分到的分片是：1&#x3D;[0,1,2], 2&#x3D;[3,4,5], 3&#x3D;[6,7,8]</span><br><span class="line"></span><br><span class="line">如果有3台服务器，分成8片，则每台服务器分到的分片是：1&#x3D;[0,1,6], 2&#x3D;[2,3,7], 3&#x3D;[4,5]</span><br><span class="line"></span><br><span class="line">如果有3台服务器，分成10片，则每台服务器分到的分片是：1&#x3D;[0,1,2,9], 2&#x3D;[3,4,5], 3&#x3D;[6,7,8]</span><br></pre></td></tr></table></figure>
+<p>上述配置文件我们分成4片，A服务分到0,1  B服务分到2，3，同时 shardingItemParameters 参数表明了每个分片对应的ItemParameters，所以A服务的 shardingContext.getShardingParameter()=0    </p>
+<p>通过这样的逻辑，我们就能实现我们的分片业务了。</p>
+<h1 id="二、xxl-job"><a href="#二、xxl-job" class="headerlink" title="二、xxl-job"></a>二、xxl-job</h1><h2 id="1-xxl-job特性"><a href="#1-xxl-job特性" class="headerlink" title="1. xxl-job特性"></a>1. xxl-job特性</h2><p>XXL-JOB是一个轻量级分布式任务调度平台，其核心设计目标是开发迅速、学习简单、轻量级、易扩展。现已开放源代码并接入多家公司线上产品线，开箱即用。</p>
+<ul>
+<li>1、简单：支持通过Web页面对任务进行CRUD操作，操作简单，一分钟上手；</li>
+<li>2、<strong>动态</strong>：支持动态修改任务状态、启动/停止任务，以及终止运行中任务，即时生效；</li>
+<li>3、调度中心HA（中心式）：调度采用中心式设计，“调度中心”自研调度组件并支持集群部署，可保证调度中心HA；</li>
+<li>4、执行器HA（分布式）：任务分布式执行，任务”执行器”支持集群部署，可保证任务执行HA；</li>
+<li>5、注册中心: 执行器会周期性自动注册任务, 调度中心将会自动发现注册的任务并触发执行。同时，也支持手动录入执行器地址；</li>
+<li>6、弹性扩容缩容：一旦有新执行器机器上线或者下线，下次调度时将会重新分配任务；</li>
+<li>7、路由策略：执行器集群部署时提供丰富的路由策略，包括：第一个、最后一个、轮询、随机、一致性HASH、最不经常使用、最近最久未使用、故障转移、忙碌转移等；</li>
+<li>8、故障转移：任务路由策略选择”故障转移”情况下，如果执行器集群中某一台机器故障，将会自动Failover切换到一台正常的执行器发送调度请求。</li>
+<li>9、阻塞处理策略：调度过于密集执行器来不及处理时的处理策略，策略包括：单机串行（默认）、丢弃后续调度、覆盖之前调度；</li>
+<li>10、任务超时控制：支持自定义任务超时时间，任务运行超时将会主动中断任务；</li>
+<li>11、任务失败重试：支持自定义任务失败重试次数，当任务失败时将会按照预设的失败重试次数主动进行重试；其中分片任务支持分片粒度的失败重试；</li>
+<li>12、任务失败告警；默认提供邮件方式失败告警，同时预留扩展接口，可方便的扩展短信、钉钉等告警方式；</li>
+<li>13、分片广播任务：执行器集群部署时，任务路由策略选择”分片广播”情况下，一次任务调度将会广播触发集群中所有执行器执行一次任务，可根据分片参数开发分片任务；</li>
+<li>14、动态分片：分片广播任务以执行器为维度进行分片，支持动态扩容执行器集群从而动态增加分片数量，协同进行业务处理；在进行大数据量业务操作时可显著提升任务处理能力和速度。</li>
+<li>15、事件触发：除了”Cron方式”和”任务依赖方式”触发任务执行之外，支持基于事件的触发任务方式。调度中心提供触发任务单次执行的API服务，可根据业务事件灵活触发。</li>
+<li>16、任务进度监控：支持实时监控任务进度；</li>
+<li>17、Rolling实时日志：支持在线查看调度结果，并且支持以Rolling方式实时查看执行器输出的完整的执行日志；</li>
+<li>18、GLUE：提供Web IDE，支持在线开发任务逻辑代码，动态发布，实时编译生效，省略部署上线的过程。支持30个版本的历史版本回溯。</li>
+<li>19、脚本任务：支持以GLUE模式开发和运行脚本任务，包括Shell、Python、NodeJS、PHP、PowerShell等类型脚本;</li>
+<li>20、命令行任务：原生提供通用命令行任务Handler（Bean任务，”CommandJobHandler”）；业务方只需要提供命令行即可；</li>
+<li>21、任务依赖：支持配置子任务依赖，当父任务执行结束且执行成功后将会主动触发一次子任务的执行, 多个子任务用逗号分隔；</li>
+<li>22、一致性：“调度中心”通过DB锁保证集群分布式调度的一致性, 一次任务调度只会触发一次执行；</li>
+<li>23、自定义任务参数：支持在线配置调度任务入参，即时生效；</li>
+<li>24、调度线程池：调度系统多线程触发调度运行，确保调度精确执行，不被堵塞；</li>
+<li>25、数据加密：调度中心和执行器之间的通讯进行数据加密，提升调度信息安全性；</li>
+<li>26、邮件报警：任务失败时支持邮件报警，支持配置多邮件地址群发报警邮件；</li>
+<li>27、推送maven中央仓库: 将会把最新稳定版推送到maven中央仓库, 方便用户接入和使用;</li>
+<li>28、运行报表：支持实时查看运行数据，如任务数量、调度次数、执行器数量等；以及调度报表，如调度日期分布图，调度成功分布图等；</li>
+<li>29、全异步：任务调度流程全异步化设计实现，如异步调度、异步运行、异步回调等，有效对密集调度进行流量削峰，理论上支持任意时长任务的运行；</li>
+<li>30、跨平台：原生提供通用HTTP任务Handler（Bean任务，”HttpJobHandler”）；业务方只需要提供HTTP链接即可，不限制语言、平台；</li>
+<li>31、国际化：调度中心支持国际化设置，提供中文、英文两种可选语言，默认为中文；</li>
+<li>32、容器化：提供官方docker镜像，并实时更新推送dockerhub，进一步实现产品开箱即用；</li>
+<li>33、线程池隔离：调度线程池进行隔离拆分，慢任务自动降级进入”Slow”线程池，避免耗尽调度线程，提高系统稳定性；</li>
+<li>34、用户管理：支持在线管理系统用户，存在管理员、普通用户两种角色；</li>
+<li>35、权限控制：执行器维度进行权限控制，管理员拥有全量权限，普通用户需要分配执行器权限后才允许相关操作；</li>
+</ul>
+<h2 id="2-基本概念"><a href="#2-基本概念" class="headerlink" title="2. 基本概念"></a>2. 基本概念</h2><h3 id="2-1-调度中心"><a href="#2-1-调度中心" class="headerlink" title="2.1 调度中心"></a>2.1 调度中心</h3><p>负责管理调度信息，按照调度配置发出调度请求，自身不承担业务代码。调度系统与任务解耦，提高了系统可用性和稳定性，同时调度系统性能不再受限于任务模块； 支持可视化、简单且动态的管理调度信息，包括任务新建，更新，删除，GLUE开发和任务报警等，所有上述操作都会实时生效，同时支持监控调度结果以及执行日志，支持执行器Failover。</p>
+<p><strong>调度中心HA</strong></p>
+<p>基于数据库的集群方案；集群分布式并发环境中进行定时任务调度时，会在各个节点会上报任务，存到数据库中，执行时会从数据库中取出触发器来执行，如果触发器的名称和执行时间相同，则只有一个节点去执行此任务。</p>
+<p><strong>并行调度</strong></p>
+<p>XXL-JOB的每个调度任务虽然在调度模块是并行调度执行的，但是任务调度传递到任务模块的“执行器”确实串行执行的，同时支持任务终止。</p>
+<h3 id="2-2-执行器"><a href="#2-2-执行器" class="headerlink" title="2.2 执行器"></a>2.2 执行器</h3><p>负责接收调度请求并执行任务逻辑。任务模块专注于任务的执行等操作，开发和维护更加简单和高效； 接收“调度中心”的执行请求、终止请求和日志请求等。</p>
+<p>执行器实际上是一个内嵌的Server，默认端口9999（配置项：xxl.job.executor.port）。</p>
+<p>在项目启动时，执行器会通过“@JobHandler”识别Spring容器中“Bean模式任务”，以注解的value属性为key管理起来。</p>
+<p>“执行器”接收到“调度中心”的调度请求时，如果任务类型为“Bean模式”，将会匹配Spring容器中的“Bean模式任务”，然后调用其execute方法，执行任务逻辑。如果任务类型为“GLUE模式”，将会加载GLue代码，实例化Java对象，注入依赖的Spring服务（注意：Glue代码中注入的Spring服务，必须存在与该“执行器”项目的Spring容器中），然后调用execute方法，执行任务逻辑。</p>
+<p><strong>执行器HA</strong></p>
+<p>执行器如若集群部署，调度中心将会感知到在线的所有执行器，如“127.0.0.1:9997, 127.0.0.1:9998, 127.0.0.1:9999”。</p>
+<p>当任务”路由策略”选择”故障转移(FAILOVER)”时，当调度中心每次发起调度请求时，会按照顺序对执行器发出心跳检测请求，第一个检测为存活状态的执行器将会被选定并发送调度请求。</p>
+<h3 id="2-3-一次完整的任务调度通讯流程"><a href="#2-3-一次完整的任务调度通讯流程" class="headerlink" title="2.3 一次完整的任务调度通讯流程"></a>2.3 一次完整的任务调度通讯流程</h3><p>1、“调度中心”向“执行器”发送http调度请求: “执行器”中接收请求的服务，实际上是一台内嵌Server，默认端口9999;</p>
+<p>2、“执行器”执行任务逻辑；</p>
+<p>3、“执行器”http回调“调度中心”调度结果: “调度中心”中接收回调的服务，是针对执行器开放一套API服务;</p>
+<p><strong>故障转移&amp;失败重试</strong></p>
+<p>一次完整任务流程包括”调度（调度中心） + 执行（执行器）”两个阶段。</p>
+<ul>
+<li>“故障转移”发生在调度阶段，在执行器集群部署时，如果某一台执行器发生故障，该策略支持自动进行Failover切换到一台正常的执行器机器并且完成调度请求流程。</li>
+<li>“失败重试”发生在”调度 + 执行”两个阶段，支持通过自定义任务失败重试次数，当任务失败时将会按照预设的失败重试次数主动进行重试；</li>
+</ul>
+<h2 id="3-使用"><a href="#3-使用" class="headerlink" title="3. 使用"></a>3. 使用</h2><h3 id="3-1-初始化“调度数据库”"><a href="#3-1-初始化“调度数据库”" class="headerlink" title="3.1 初始化“调度数据库”"></a>3.1 初始化“调度数据库”</h3><h4 id="3-1-1-Mysql"><a href="#3-1-1-Mysql" class="headerlink" title="3.1.1 Mysql"></a>3.1.1 Mysql</h4><p>调度中心支持集群部署，集群情况下各节点务必连接同一个mysql实例;</p>
+<p>如果mysql做主从,调度中心集群节点务必强制走主库;</p>
+<blockquote>
+<p><a target="_blank" rel="noopener" href="https://github.com/xuxueli/xxl-job/blob/master/doc/db/tables_xxl_job.sql">https://github.com/xuxueli/xxl-job/blob/master/doc/db/tables_xxl_job.sql</a></p>
+</blockquote>
+<h4 id="3-1-2-Oracle"><a href="#3-1-2-Oracle" class="headerlink" title="3.1.2 Oracle"></a>3.1.2 Oracle</h4><p><a target="_blank" rel="noopener" href="https://pan.baidu.com/s/11XXP_3HMSKM60ncL8ldakA">百度网盘下载地址</a> 提取码:avkm</p>
+<p>执行xxl-job-master/doc/db/tables_xxl_job.sql</p>
+<h3 id="3-2-配置部署“调度中心”"><a href="#3-2-配置部署“调度中心”" class="headerlink" title="3.2 配置部署“调度中心”"></a>3.2 配置部署“调度中心”</h3><h4 id="3-2-1-Mysql"><a href="#3-2-1-Mysql" class="headerlink" title="3.2.1 Mysql"></a>3.2.1 Mysql</h4><ol>
+<li><p>解压源码+配置调度中心方式</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/xuxueli/xxl-job">解压源码</a>按照maven格式将源码导入IDE, 使用maven进行编译即可，源码结构如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">xxl-job-admin：调度中心</span><br><span class="line">xxl-job-core：公共依赖</span><br><span class="line">xxl-job-executor-samples：执行器Sample示例（选择合适的版本执行器，可直接使用，也可以参考其并将现有项目改造成执行器）</span><br><span class="line">    ：xxl-job-executor-sample-springboot：Springboot版本，通过Springboot管理执行器，推荐这种方式；</span><br><span class="line">    ：xxl-job-executor-sample-spring：Spring版本，通过Spring容器管理执行器，比较通用；</span><br><span class="line">    ：xxl-job-executor-sample-frameless：无框架版本；</span><br><span class="line">    ：xxl-job-executor-sample-jfinal：JFinal版本，通过JFinal管理执行器；</span><br><span class="line">    ：xxl-job-executor-sample-nutz：Nutz版本，通过Nutz管理执行器；</span><br></pre></td></tr></table></figure>
+<p>修改/xxl-job/xxl-job-admin/src/main/resources/xxl-job-admin.properties</p>
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">### 调度中心JDBC链接：链接地址请保持和 2.1章节 所创建的调度数据库的地址一致</span></span><br><span class="line"><span class="meta">spring.datasource.url</span>=<span class="string">jdbc:mysql://127.0.0.1:3306/xxl_job?Unicode=true&amp;characterEncoding=UTF-8</span></span><br><span class="line"><span class="meta">spring.datasource.username</span>=<span class="string">root</span></span><br><span class="line"><span class="meta">spring.datasource.password</span>=<span class="string">root_pwd</span></span><br><span class="line"><span class="meta">spring.datasource.driver-class-name</span>=<span class="string">com.mysql.jdbc.Driver</span></span><br><span class="line"></span><br><span class="line"><span class="comment">### 报警邮箱</span></span><br><span class="line"><span class="meta">spring.mail.host</span>=<span class="string">smtp.qq.com</span></span><br><span class="line"><span class="meta">spring.mail.port</span>=<span class="string">25</span></span><br><span class="line"><span class="meta">spring.mail.username</span>=<span class="string">xxx@qq.com</span></span><br><span class="line"><span class="meta">spring.mail.password</span>=<span class="string">xxx</span></span><br><span class="line"><span class="meta">spring.mail.properties.mail.smtp.auth</span>=<span class="string">true</span></span><br><span class="line"><span class="meta">spring.mail.properties.mail.smtp.starttls.enable</span>=<span class="string">true</span></span><br><span class="line"><span class="meta">spring.mail.properties.mail.smtp.starttls.required</span>=<span class="string">true</span></span><br><span class="line"><span class="meta">spring.mail.properties.mail.smtp.socketFactory.class</span>=<span class="string">javax.net.ssl.SSLSocketFactory</span></span><br><span class="line"></span><br><span class="line"><span class="comment">### xxl-job, access token</span></span><br><span class="line"><span class="meta">xxl.job.accessToken</span>=<span class="string"></span></span><br><span class="line"></span><br><span class="line"><span class="comment">### xxl-job, i18n (default empty as chinese, &quot;en&quot; as english)</span></span><br><span class="line"><span class="meta">xxl.job.i18n</span>=<span class="string"></span></span><br></pre></td></tr></table></figure>
+<p>调度中心访问地址：<a target="_blank" rel="noopener" href="http://localhost:8080/xxl-job-admin%EF%BC%8C%E9%BB%98%E8%AE%A4%E8%B4%A6%E5%8F%B7%E5%AF%86%E7%A0%81&quot;admin/123456%E2%80%9C">http://localhost:8080/xxl-job-admin，默认账号密码&quot;admin/123456“</a></p>
+</li>
+<li><p>Docker 镜像方式</p>
+<p>拉取镜像</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker pull xuxueli/xxl-job-admin</span><br></pre></td></tr></table></figure>
+<p>创建容器并运行</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">docker run -d --rm \</span><br><span class="line">    -e PARAMS=&quot;--spring.datasource.url=jdbc:mysql://你的mysql数据库ip:3306/xxl-job?Unicode=true&amp;characterEncoding=UTF-8 --spring.datasource.username=你的mysql数据库用户名 --spring.datasource.password=你的mysql数据库密码&quot; \</span><br><span class="line">    -p 8680:8080 \</span><br><span class="line">    --name xxl-job-admin xuxueli/xxl-job-admin:2.0.2</span><br></pre></td></tr></table></figure>
+<p>调度中心访问地址：http://虚拟机地址:8680/xxl-job-admin，默认账号密码”admin/123456“</p>
+</li>
+</ol>
+<h4 id="3-2-2-Oracle"><a href="#3-2-2-Oracle" class="headerlink" title="3.2.2 Oracle"></a>3.2.2 Oracle</h4><ol>
+<li>解压下载后的项目，按mysql的方式修改/xxl-job/xxl-job-admin/src/main/resources/xxl-job-admin.properties</li>
+<li>因为xxl-job-master\xxl-job-admin\pom.xml中引入了ojdbc7，所以maven打包工具中需要本地配置ojdbc7的jar包。</li>
+<li>一切准备就绪后，在xxl-job-master目录下执行mvn clean package，进行打包操作。成功后，依次启动xxl-job-master\xxl-job-admin\target\xxl-job-admin-2.1.1-SNAPSHOT.jar，xxl-job-master\xxl-job-executor-samples\xxl-job-executor-sample-springboot\target\xxl-job-executor-sample-springboot-2.1.1-SNAPSHOT.jar</li>
+<li>在浏览器中进行访问调度平台<a target="_blank" rel="noopener" href="http://localhost:8080/xxl-job-admin">http://localhost:8080/xxl-job-admin</a> ，用户admin，密码123456</li>
+</ol>
+<h4 id="3-2-3-集群"><a href="#3-2-3-集群" class="headerlink" title="3.2.3 集群"></a>3.2.3 集群</h4><p>调度中心支持集群部署，提升调度系统容灾和可用性。</p>
+<p>调度中心集群部署时，几点要求和建议：</p>
+<ul>
+<li>DB配置保持一致；</li>
+<li>登陆账号配置保持一致；</li>
+<li>集群机器时钟保持一致（单机集群忽视）；</li>
+<li>建议：推荐通过nginx为调度中心集群做负载均衡，分配域名。调度中心访问、执行器回调配置、调用API服务等操作均通过该域名进行。</li>
+</ul>
+<h4 id="3-2-4-将一个spring-boot项目变成一个xxl-job任务的执行器"><a href="#3-2-4-将一个spring-boot项目变成一个xxl-job任务的执行器" class="headerlink" title="3.2.4 将一个spring boot项目变成一个xxl-job任务的执行器"></a>3.2.4 将一个spring boot项目变成一个xxl-job任务的执行器</h4><p>在现有项目的pom.xml加上xxl-job core依赖</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.xuxueli<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>xxl-job-core<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>2.0.2<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>在现有的配置文件src/main/resources/application.properties文件中添加xxl-job调度中心的配置</p>
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">### xxl-job admin address list, such as &quot;http://address&quot; or &quot;http://address01,http://address02&quot;</span></span><br><span class="line"><span class="meta">xxl.job.admin.addresses</span>=<span class="string">http://127.0.0.1:8680/xxl-job-admin</span></span><br><span class="line"></span><br><span class="line"><span class="comment">### xxl-job executor address</span></span><br><span class="line"><span class="meta">xxl.job.executor.appname</span>=<span class="string">xxl-job-executor-sample</span></span><br><span class="line"><span class="meta">xxl.job.executor.ip</span>=<span class="string"></span></span><br><span class="line"><span class="meta">xxl.job.executor.port</span>=<span class="string">9999</span></span><br><span class="line"></span><br><span class="line"><span class="comment">### xxl-job, access token</span></span><br><span class="line"><span class="meta">xxl.job.accessToken</span>=<span class="string"></span></span><br><span class="line"></span><br><span class="line"><span class="comment">### xxl-job log path</span></span><br><span class="line"><span class="meta">xxl.job.executor.logpath</span>=<span class="string">logs/xxl-job/jobhandler</span></span><br><span class="line"><span class="comment">### xxl-job log retention days</span></span><br><span class="line"><span class="meta">xxl.job.executor.logretentiondays</span>=<span class="string">-1</span></span><br></pre></td></tr></table></figure>
+<p>然后在spring boot中把xxl job注册成服务</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Bean(initMethod = &quot;start&quot;, destroyMethod = &quot;destroy&quot;)</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> XxlJobSpringExecutor <span class="title">xxlJobExecutor</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    logger.info(<span class="string">&quot;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; xxl-job config init.&quot;</span>);</span><br><span class="line">    XxlJobSpringExecutor xxlJobSpringExecutor = <span class="keyword">new</span> XxlJobSpringExecutor();</span><br><span class="line">    xxlJobSpringExecutor.setAdminAddresses(adminAddresses);</span><br><span class="line">    xxlJobSpringExecutor.setAppName(appName);</span><br><span class="line">    xxlJobSpringExecutor.setIp(ip);</span><br><span class="line">    xxlJobSpringExecutor.setPort(port);</span><br><span class="line">    xxlJobSpringExecutor.setAccessToken(accessToken);</span><br><span class="line">    xxlJobSpringExecutor.setLogPath(logPath);</span><br><span class="line">    xxlJobSpringExecutor.setLogRetentionDays(logRetentionDays);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> xxlJobSpringExecutor;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>启动项目，在调度中心查看效果</p>
+<h3 id="3-3-执行定时任务"><a href="#3-3-执行定时任务" class="headerlink" title="3.3 执行定时任务"></a>3.3 执行定时任务</h3><h4 id="3-3-1-BEAN模式"><a href="#3-3-1-BEAN模式" class="headerlink" title="3.3.1 BEAN模式"></a>3.3.1 BEAN模式</h4><ol>
+<li>在代码中定义调度任务内容</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@JobHandler(value=&quot;testJob&quot;)</span> <span class="comment">//与调度中心中的JobHandler关联</span></span><br><span class="line"><span class="meta">@Service</span></span><br><span class="line"><span class="meta">@Log4j</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">DemoJobHander</span> <span class="keyword">extends</span> <span class="title">IJobHandler</span></span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> JobHandleStatus <span class="title">execute</span><span class="params">(String... params)</span> <span class="keyword">throws</span> Exception</span>&#123;</span><br><span class="line">        log.info(<span class="string">&quot;XXL-JOB,Hello World&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> JobHandleStatus.SUCCESS;<span class="comment">//调度中心判断成功失败的方式</span></span><br><span class="line">        <span class="comment">//return JobHandleStatus.FAIL;</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ol start="2">
+<li>在调度中心中新建调度任务</li>
+</ol>
+<p>为方便用户参考与快速实用，示例执行器内原生提供多个Bean模式任务Handler，可以直接配置实用，如下：</p>
+<ul>
+<li>demoJobHandler：简单示例任务，任务内部模拟耗时任务逻辑，用户可在线体验Rolling Log等功能；</li>
+<li>shardingJobHandler：分片示例任务，任务内部模拟处理分片参数，可参考熟悉分片任务；</li>
+<li>httpJobHandler：通用HTTP任务Handler；业务方只需要提供HTTP链接即可，不限制语言、平台；</li>
+<li>commandJobHandler：通用命令行任务Handler；业务方只需要提供命令行即可；如 “pwd”命令；</li>
+</ul>
+<h4 id="3-3-2-GLUE模式-JAVA"><a href="#3-3-2-GLUE模式-JAVA" class="headerlink" title="3.3.2 GLUE模式(JAVA)"></a>3.3.2 GLUE模式(JAVA)</h4><p>任务以源码方式维护在调度中心，支持通过Web IDE在线更新，实时编译和生效，因此不需要指定JobHandler。开发流程如下：</p>
+<ol>
+<li><p>新建定时任务，运行模式为GLUE</p>
+</li>
+<li><p>点击GLUE按钮</p>
+<p>在WEB IDE界面进行代码编写，支持30个版本的版本回溯</p>
+</li>
+</ol>
+
+      
+
+      
+        <div class="page-reward">
+          <a href="javascript:;" class="page-reward-btn tooltip-top">
+            <div class="tooltip tooltip-east">
+            <span class="tooltip-item">
+              赏
+            </span>
+            <span class="tooltip-content">
+              <span class="tooltip-text">
+                <span class="tooltip-inner">
+                  <p class="reward-p"><i class="icon icon-quo-left"></i>谢谢你请我吃糖果<i class="icon icon-quo-right"></i></p>
+                  <div class="reward-box">
+                    
+                    
+                  </div>
+                </span>
+              </span>
+            </span>
+          </div>
+          </a>
+        </div>
+      
+    </div>
+    <div class="article-info article-info-index">
       
       
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2021" class="archive-year">2021</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/01/20/%E7%BC%93%E5%AD%98/" class="archive-article-date">
-  	<time datetime="2021-01-20T03:16:57.782Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-01-20</time>
-</a>
-        </div>
-    	 
-        <div class="article-info info-on-right">
-          
-          
+      
 
+      
+
+      
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
         </div>
-        <div class="clearfix"></div>
-    </header>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//pan.baidu.com/share/qrcode?url=http://example.com/2021/01/20/ElasticJob%E3%80%81xxl-job/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
+      
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/01/20/%E5%93%8D%E5%BA%94%E5%BC%8F%E7%BC%96%E7%A8%8B/" class="archive-article-date">
-  	<time datetime="2021-01-20T03:16:57.767Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-01-20</time>
-</a>
-        </div>
-    	 
-        <div class="article-info info-on-right">
-          
-          
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
   
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/01/20/%E5%88%86%E5%B8%83%E5%BC%8F%E4%B8%80%E8%87%B4%E6%80%A7%E9%97%AE%E9%A2%98/" class="archive-article-date">
-  	<time datetime="2021-01-20T03:16:57.761Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-01-20</time>
-</a>
-        </div>
-    	 
-        <div class="article-info info-on-right">
-          
-          
+<nav id="article-nav">
+  
+    <a href="/2021/01/20/HazelCast%E3%80%81Ignite/" id="article-nav-newer" class="article-nav-link-wrap">
+      <i class="icon-circle-left"></i>
+      <div class="article-nav-title">
+        
+          (no title)
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2021/01/20/Dubbo%E3%80%81Netty%E3%80%81JMS%E3%80%81AMQP/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title"></div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/01/20/rockermq%E5%AE%95%E6%9C%BA%E5%8F%8A%E9%87%8D%E5%A4%8D%E6%B6%88%E8%B4%B9%E9%97%AE%E9%A2%98/" class="archive-article-date">
-  	<time datetime="2021-01-20T03:16:57.756Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-01-20</time>
-</a>
-        </div>
-    	 
-        <div class="article-info info-on-right">
-          
-          
 
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
         </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/01/20/nacos/" class="archive-article-date">
-  	<time datetime="2021-01-20T03:16:57.751Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-01-20</time>
-</a>
-        </div>
-    	 
-        <div class="article-info info-on-right">
-          
-          
+        
+        
+    </div>
+</aside>
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/01/20/linux/" class="archive-article-date">
-  	<time datetime="2021-01-20T03:16:57.744Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-01-20</time>
-</a>
-        </div>
-    	 
-        <div class="article-info info-on-right">
-          
-          
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/01/20/jvm/" class="archive-article-date">
-  	<time datetime="2021-01-20T03:16:57.738Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-01-20</time>
-</a>
-        </div>
-    	 
-        <div class="article-info info-on-right">
-          
-          
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/01/20/java%E5%B9%B6%E5%8F%91%E5%9F%BA%E7%A1%80/" class="archive-article-date">
-  	<time datetime="2021-01-20T03:16:57.731Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-01-20</time>
-</a>
-        </div>
-    	 
-        <div class="article-info info-on-right">
-          
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/01/20/graphql/" class="archive-article-date">
-  	<time datetime="2021-01-20T03:16:57.723Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-01-20</time>
-</a>
-        </div>
-    	 
-        <div class="article-info info-on-right">
-          
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/01/20/flink/" class="archive-article-date">
-  	<time datetime="2021-01-20T03:16:57.716Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-01-20</time>
-</a>
-        </div>
-    	 
-        <div class="article-info info-on-right">
-          
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
   
   
-    </div></section>
   
 
-    
-    <nav id="page-nav">
-      <span class="page-number current">1</span><a class="page-number" href="/archives/page/2/">2</a><a class="page-number" href="/archives/page/3/">3</a><a class="extend next" rel="next" href="/archives/page/2/">Next &amp;raquo;</a>
-    </nav>
+  
+
+  
+
   
 
 
@@ -402,8 +493,8 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
-		isArchive: true,
+		isPost: true,
+		isArchive: false,
 		isTag: false,
 		isCategory: false,
 		open_in_new: false,

@@ -6,13 +6,17 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://example.com">
-  <title>Archives | Hexo</title>
+  <title>Hexo</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta property="og:type" content="website">
+  <meta name="description" content="一、简介GraphQL 既是一种用于 API 的查询语言也是一个满足你数据查询的运行时。 GraphQL 对你的 API 中的数据提供了一套易于理解的完整描述，使得客户端能够准确地获得它需要的数据，而且没有任何冗余，也让 API 更容易地随着时间推移而演进，还能用于构建强大的开发者工具。 二、和Restful的比较1. Restful的一些不足 扩展性，单个RESTful接口返回数据越来越臃肿 比">
+<meta property="og:type" content="article">
 <meta property="og:title" content="Hexo">
-<meta property="og:url" content="http://example.com/archives/index.html">
+<meta property="og:url" content="http://example.com/2021/01/20/graphql/index.html">
 <meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="一、简介GraphQL 既是一种用于 API 的查询语言也是一个满足你数据查询的运行时。 GraphQL 对你的 API 中的数据提供了一套易于理解的完整描述，使得客户端能够准确地获得它需要的数据，而且没有任何冗余，也让 API 更容易地随着时间推移而演进，还能用于构建强大的开发者工具。 二、和Restful的比较1. Restful的一些不足 扩展性，单个RESTful接口返回数据越来越臃肿 比">
 <meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2021-01-20T03:16:57.723Z">
+<meta property="article:modified_time" content="2021-01-20T03:16:57.723Z">
 <meta property="article:author" content="John Doe">
 <meta name="twitter:card" content="summary">
   
@@ -150,235 +154,248 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
-  
-  
+            <article id="post-graphql" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
     
-    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="一、简介"><a href="#一、简介" class="headerlink" title="一、简介"></a>一、简介</h1><p>GraphQL 既是一种用于 API 的查询语言也是一个满足你数据查询的运行时。 GraphQL 对你的 API 中的数据提供了一套易于理解的完整描述，使得客户端能够准确地获得它需要的数据，而且没有任何冗余，也让 API 更容易地随着时间推移而演进，还能用于构建强大的开发者工具。</p>
+<h1 id="二、和Restful的比较"><a href="#二、和Restful的比较" class="headerlink" title="二、和Restful的比较"></a>二、和Restful的比较</h1><h2 id="1-Restful的一些不足"><a href="#1-Restful的一些不足" class="headerlink" title="1. Restful的一些不足"></a>1. Restful的一些不足</h2><ul>
+<li><p>扩展性，单个RESTful接口返回数据越来越臃肿</p>
+<p>比如获取用户信息<code>/users/:id</code>，最初可能只有id、昵称，但随着需求的变化，用户所包含的字段可能会越来越多，年龄、性别、头像、经验、等级，等等等等。</p>
+<p>而具体到某个前端页面，可能只需要其中一小部分数据，这样就会增加网络传输量，前端获取了大量不必要的数据。</p>
+</li>
+<li><p>某个前端展现，实际需要调用多个独立的RESTful API才能获取到足够的数据</p>
+<p>比如一个文章详情页，最初可能只需要文章内容，那么前端就调用<code>/articles/:aid</code>获取到文章内容来展现就行了</p>
+<p>但随着需求的演进，产品可能会希望加上作者信息（昵称、头像等），这时前端又需要在获取文章详情后，根据其中的作者id字段继续获取作者相关的信息，<code>/user/:uid</code></p>
+<p>然后，需求又变化了，产品希望在加上这篇文章的评论，这时前端需要继续调用<code>/comment/:aid</code>来拉取评论列表</p>
+<p>对于Web前端而言，由于ajax技术的存在，这种的请求数据方式，也就开发上稍微麻烦些，并不会造成太大的问题；但对于App来说，渲染的方式不同，必须要拉取的全部的数据之后，才能绘制界面，就会导致这个界面必须要等到所有3个RESTful接口的返回数据都拿到，才能进行绘制。</p>
+</li>
+</ul>
+<h2 id="2-GraphQL的一些优点"><a href="#2-GraphQL的一些优点" class="headerlink" title="2. GraphQL的一些优点"></a>2. GraphQL的一些优点</h2><ul>
+<li><p>所见即所得</p>
+<p>查询的返回结果就是输入的查询结构的精确映射</p>
+<p>查询：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    user(uid:1) &#123;</span><br><span class="line">        uid</span><br><span class="line">        name</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>返回：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="attr">&quot;data&quot;</span>: &#123;</span><br><span class="line">    <span class="attr">&quot;user&quot;</span>: &#123;</span><br><span class="line">      <span class="attr">&quot;uid&quot;</span>: <span class="string">&quot;1&quot;</span>,</span><br><span class="line">      <span class="attr">&quot;name&quot;</span>: <span class="string">&quot;xxx&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li><p>减少网络请求次数</p>
+<p>如果设计的数据结构是从属的（例如，上文中文章的作者信息），直接就能在查询语句中指定</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    article(aid:1) &#123;</span><br><span class="line">        title</span><br><span class="line">        content</span><br><span class="line">        author &#123;</span><br><span class="line">            uid</span><br><span class="line">            name</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>即使数据结构是独立的，也可以在查询语句中指定上下文，只需要一次网络请求，就能获得资源和子资源的数据（例如，上文中文章的评论信息）</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    article(aid:1) &#123;</span><br><span class="line">        title</span><br><span class="line">        content</span><br><span class="line">        author &#123;</span><br><span class="line">            uid</span><br><span class="line">            name</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;,</span><br><span class="line">    comment &#123;</span><br><span class="line">        content,</span><br><span class="line">        author &#123;</span><br><span class="line">            uid</span><br><span class="line">            name</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li><p>代码即文档</p>
+<p>GraphQL会把schema定义和相关的注释生成可视化的文档，从而使得代码的变更，直接就反映到最新的文档上，避免RESTful中手工维护可能会造成代码、文档不一致的问题。</p>
+</li>
+<li><p>参数类型强校验</p>
+<p>RESTful方案本身没有对参数的类型做规定，往往都需要自行实现参数的校验机制，以确保安全。</p>
+<p>但GraphQL提供了强类型的schema机制，从而天然确保了参数类型的合法性。</p>
+</li>
+</ul>
+<h2 id="3-GraphQL的局限性"><a href="#3-GraphQL的局限性" class="headerlink" title="3. GraphQL的局限性"></a>3. GraphQL的局限性</h2><p>参数类型受限，如下：</p>
+<ul>
+<li>Int: 有符号的32位整型</li>
+<li>Float: 有符号的双精度浮点型</li>
+<li>String: UTF‐8字符序列</li>
+<li>Boolean: 布尔型</li>
+<li>ID: 常用于获取数据的唯一标志，或缓存的键值，它也会被序列化为String，但可读性差。</li>
+<li>枚举类型</li>
+<li>对象</li>
+<li>集合<code>[]</code></li>
+</ul>
+<h1 id="三、使用"><a href="#三、使用" class="headerlink" title="三、使用"></a>三、使用</h1><h2 id="1-引入依赖"><a href="#1-引入依赖" class="headerlink" title="1. 引入依赖"></a>1. 引入依赖</h2><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.graphql-java<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>graphql-spring-boot-starter<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">version</span>&gt;</span>3.6.0<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"></span><br><span class="line">        <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.graphql-java<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>graphql-java-tools<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">version</span>&gt;</span>3.2.0<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h2 id="2-在resource中创建books-graphql文件"><a href="#2-在resource中创建books-graphql文件" class="headerlink" title="2. 在resource中创建books.graphql文件"></a>2. 在resource中创建books.graphql文件</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">schema &#123;</span><br><span class="line">    query: Query</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">type Query&#123;</span><br><span class="line">    allBooks : [Book]</span><br><span class="line">    book(id: String): Book</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">type Book&#123;</span><br><span class="line">    isn: String</span><br><span class="line">    title:String</span><br><span class="line">    publisher:String</span><br><span class="line">    authors: [String]</span><br><span class="line">    publishedDate: String</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h2 id="3-定义实体类和Repository方法"><a href="#3-定义实体类和Repository方法" class="headerlink" title="3. 定义实体类和Repository方法"></a>3. 定义实体类和Repository方法</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@NoArgsConstructor</span></span><br><span class="line"><span class="meta">@AllArgsConstructor</span></span><br><span class="line"><span class="meta">@Table</span></span><br><span class="line"><span class="meta">@Data</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Book</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Id</span></span><br><span class="line">    <span class="keyword">private</span> String isn;</span><br><span class="line">    <span class="keyword">private</span> String title;</span><br><span class="line">    <span class="keyword">private</span> String publisher;</span><br><span class="line">    <span class="keyword">private</span> String[] authors;</span><br><span class="line">    <span class="keyword">private</span> String publishedDate;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">BookReposity</span> <span class="keyword">extends</span> <span class="title">JpaRepository</span>&lt;<span class="title">Book</span>,<span class="title">String</span>&gt; </span>&#123;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="4-定义BookResource处理请求"><a href="#4-定义BookResource处理请求" class="headerlink" title="4. 定义BookResource处理请求"></a>4. 定义BookResource处理请求</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@RequestMapping(&quot;/rest/books&quot;)</span></span><br><span class="line"><span class="meta">@RestController</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">BookResource</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    GraphQLService graphQLService;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@PostMapping</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> ResponseEntity&lt;Object&gt; <span class="title">getAllBooks</span><span class="params">(<span class="meta">@RequestBody</span> String query)</span> </span>&#123;</span><br><span class="line">        ExecutionResult execute = graphQLService.getGraphQL().execute(query);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> ResponseEntity&lt;&gt;(execute, HttpStatus.OK);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="5-定义业务层方法"><a href="#5-定义业务层方法" class="headerlink" title="5. 定义业务层方法"></a>5. 定义业务层方法</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Service</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">GraphQLService</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    BookRepository bookRepository;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Value(&quot;classpath:books.graphql&quot;)</span></span><br><span class="line">    Resource resource;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> GraphQL graphQL;</span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    <span class="keyword">private</span> AllBooksDataFetcher allBooksDataFetcher;</span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    <span class="keyword">private</span> BookDataFetcher bookDataFetcher;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="meta">@PostConstruct</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">loadSchema</span><span class="params">()</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="comment">//Load Books into the Book Repository</span></span><br><span class="line">        loadDataIntoHSQL();</span><br><span class="line"></span><br><span class="line">        <span class="comment">// get the schema</span></span><br><span class="line">        File schemaFile = resource.getFile();</span><br><span class="line">        <span class="comment">// parse schema</span></span><br><span class="line">        TypeDefinitionRegistry typeRegistry = <span class="keyword">new</span> SchemaParser().parse(schemaFile);</span><br><span class="line">        RuntimeWiring wiring = buildRuntimeWiring();</span><br><span class="line">        GraphQLSchema schema = <span class="keyword">new</span> SchemaGenerator().makeExecutableSchema(typeRegistry, wiring);</span><br><span class="line">        graphQL = GraphQL.newGraphQL(schema).build();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//存入数据到BookRepository</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">loadDataIntoHSQL</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        Stream.of(</span><br><span class="line">                <span class="keyword">new</span> Book(<span class="string">&quot;123&quot;</span>, <span class="string">&quot;Book of Clouds&quot;</span>, <span class="string">&quot;Kindle Edition&quot;</span>,</span><br><span class="line">                        <span class="keyword">new</span> String[] &#123;</span><br><span class="line">                        <span class="string">&quot;Chloe Aridjis&quot;</span></span><br><span class="line">                        &#125;, <span class="string">&quot;Nov 2017&quot;</span>),</span><br><span class="line">                <span class="keyword">new</span> Book(<span class="string">&quot;124&quot;</span>, <span class="string">&quot;Cloud Arch &amp; Engineering&quot;</span>, <span class="string">&quot;Orielly&quot;</span>,</span><br><span class="line">                        <span class="keyword">new</span> String[] &#123;</span><br><span class="line">                                <span class="string">&quot;Peter&quot;</span>, <span class="string">&quot;Sam&quot;</span></span><br><span class="line">                        &#125;, <span class="string">&quot;Jan 2015&quot;</span>),</span><br><span class="line">                <span class="keyword">new</span> Book(<span class="string">&quot;125&quot;</span>, <span class="string">&quot;Java 9 Programming&quot;</span>, <span class="string">&quot;Orielly&quot;</span>,</span><br><span class="line">                        <span class="keyword">new</span> String[] &#123;</span><br><span class="line">                                <span class="string">&quot;Venkat&quot;</span>, <span class="string">&quot;Ram&quot;</span></span><br><span class="line">                        &#125;, <span class="string">&quot;Dec 2016&quot;</span>)</span><br><span class="line">        ).forEach(book -&gt; &#123;</span><br><span class="line">            bookRepository.save(book);</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> RuntimeWiring <span class="title">buildRuntimeWiring</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> RuntimeWiring.newRuntimeWiring()</span><br><span class="line">                .type(<span class="string">&quot;Query&quot;</span>, typeWiring -&gt; typeWiring</span><br><span class="line">                        .dataFetcher(<span class="string">&quot;allBooks&quot;</span>, allBooksDataFetcher)</span><br><span class="line">                        .dataFetcher(<span class="string">&quot;book&quot;</span>, bookDataFetcher))</span><br><span class="line">                .build();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">//定义获取方法</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> GraphQL <span class="title">getGraphQL</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> graphQL;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h2 id="6-执行查询"><a href="#6-执行查询" class="headerlink" title="6. 执行查询"></a>6. 执行查询</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">localhost:8091&#x2F;rest&#x2F;books</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">	allBooks&#123;</span><br><span class="line">		isn</span><br><span class="line">		title</span><br><span class="line">		authors</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>查询结果：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="attr">&quot;errors&quot;</span>: [],</span><br><span class="line">    <span class="attr">&quot;data&quot;</span>: &#123;</span><br><span class="line">        <span class="attr">&quot;allBooks&quot;</span>: [</span><br><span class="line">            &#123;</span><br><span class="line">                <span class="attr">&quot;isn&quot;</span>: <span class="string">&quot;123&quot;</span>,</span><br><span class="line">                <span class="attr">&quot;title&quot;</span>: <span class="string">&quot;Book of Clouds&quot;</span>,</span><br><span class="line">                <span class="attr">&quot;authors&quot;</span>: [</span><br><span class="line">                    <span class="string">&quot;Chloe Aridjis&quot;</span></span><br><span class="line">                ]</span><br><span class="line">            &#125;,</span><br><span class="line">            &#123;</span><br><span class="line">                <span class="attr">&quot;isn&quot;</span>: <span class="string">&quot;124&quot;</span>,</span><br><span class="line">                <span class="attr">&quot;title&quot;</span>: <span class="string">&quot;Cloud Arch &amp; Engineering&quot;</span>,</span><br><span class="line">                <span class="attr">&quot;authors&quot;</span>: [</span><br><span class="line">                    <span class="string">&quot;Peter&quot;</span>,</span><br><span class="line">                    <span class="string">&quot;Sam&quot;</span></span><br><span class="line">                ]</span><br><span class="line">            &#125;,</span><br><span class="line">            &#123;</span><br><span class="line">                <span class="attr">&quot;isn&quot;</span>: <span class="string">&quot;125&quot;</span>,</span><br><span class="line">                <span class="attr">&quot;title&quot;</span>: <span class="string">&quot;Java 9 Programming&quot;</span>,</span><br><span class="line">                <span class="attr">&quot;authors&quot;</span>: [</span><br><span class="line">                    <span class="string">&quot;Venkat&quot;</span>,</span><br><span class="line">                    <span class="string">&quot;Ram&quot;</span></span><br><span class="line">                ]</span><br><span class="line">            &#125;</span><br><span class="line">        ]</span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="attr">&quot;extensions&quot;</span>: <span class="literal">null</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>执行条件查询</strong>：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">	book(id: &quot;123&quot;)&#123;</span><br><span class="line">		isn</span><br><span class="line">		title</span><br><span class="line">		authors</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>查询结果：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="attr">&quot;errors&quot;</span>: [],</span><br><span class="line">    <span class="attr">&quot;data&quot;</span>: &#123;</span><br><span class="line">        <span class="attr">&quot;book&quot;</span>: &#123;</span><br><span class="line">            <span class="attr">&quot;isn&quot;</span>: <span class="string">&quot;123&quot;</span>,</span><br><span class="line">            <span class="attr">&quot;title&quot;</span>: <span class="string">&quot;Book of Clouds&quot;</span>,</span><br><span class="line">            <span class="attr">&quot;authors&quot;</span>: [</span><br><span class="line">                <span class="string">&quot;Chloe Aridjis&quot;</span></span><br><span class="line">            ]</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="attr">&quot;extensions&quot;</span>: <span class="literal">null</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>执行多个查询只需要发送一个请求</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">	allBooks&#123;</span><br><span class="line">		isn</span><br><span class="line">		title</span><br><span class="line">		authors</span><br><span class="line">	&#125;</span><br><span class="line">	book(id: &quot;123&quot;)&#123;</span><br><span class="line">		isn</span><br><span class="line">		title</span><br><span class="line">		authors</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>查询结果</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="attr">&quot;errors&quot;</span>: [],</span><br><span class="line">    <span class="attr">&quot;data&quot;</span>: &#123;</span><br><span class="line">        <span class="attr">&quot;allBooks&quot;</span>: [</span><br><span class="line">            &#123;</span><br><span class="line">                <span class="attr">&quot;isn&quot;</span>: <span class="string">&quot;123&quot;</span>,</span><br><span class="line">                <span class="attr">&quot;title&quot;</span>: <span class="string">&quot;Book of Clouds&quot;</span>,</span><br><span class="line">                <span class="attr">&quot;authors&quot;</span>: [</span><br><span class="line">                    <span class="string">&quot;Chloe Aridjis&quot;</span></span><br><span class="line">                ]</span><br><span class="line">            &#125;,</span><br><span class="line">            &#123;</span><br><span class="line">                <span class="attr">&quot;isn&quot;</span>: <span class="string">&quot;124&quot;</span>,</span><br><span class="line">                <span class="attr">&quot;title&quot;</span>: <span class="string">&quot;Cloud Arch &amp; Engineering&quot;</span>,</span><br><span class="line">                <span class="attr">&quot;authors&quot;</span>: [</span><br><span class="line">                    <span class="string">&quot;Peter&quot;</span>,</span><br><span class="line">                    <span class="string">&quot;Sam&quot;</span></span><br><span class="line">                ]</span><br><span class="line">            &#125;,</span><br><span class="line">            &#123;</span><br><span class="line">                <span class="attr">&quot;isn&quot;</span>: <span class="string">&quot;125&quot;</span>,</span><br><span class="line">                <span class="attr">&quot;title&quot;</span>: <span class="string">&quot;Java 9 Programming&quot;</span>,</span><br><span class="line">                <span class="attr">&quot;authors&quot;</span>: [</span><br><span class="line">                    <span class="string">&quot;Venkat&quot;</span>,</span><br><span class="line">                    <span class="string">&quot;Ram&quot;</span></span><br><span class="line">                ]</span><br><span class="line">            &#125;</span><br><span class="line">        ],</span><br><span class="line">        <span class="attr">&quot;book&quot;</span>: &#123;</span><br><span class="line">            <span class="attr">&quot;isn&quot;</span>: <span class="string">&quot;123&quot;</span>,</span><br><span class="line">            <span class="attr">&quot;title&quot;</span>: <span class="string">&quot;Book of Clouds&quot;</span>,</span><br><span class="line">            <span class="attr">&quot;authors&quot;</span>: [</span><br><span class="line">                <span class="string">&quot;Chloe Aridjis&quot;</span></span><br><span class="line">            ]</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="attr">&quot;extensions&quot;</span>: <span class="literal">null</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="7-别名查询"><a href="#7-别名查询" class="headerlink" title="7. 别名查询"></a>7. 别名查询</h2><p>查询：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  empireHero: hero(episode: EMPIRE) &#123;</span><br><span class="line">    name</span><br><span class="line">  &#125;</span><br><span class="line">  jediHero: hero(episode: JEDI) &#123;</span><br><span class="line">    name</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>结果</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="attr">&quot;data&quot;</span>: &#123;</span><br><span class="line">    <span class="attr">&quot;empireHero&quot;</span>: &#123;</span><br><span class="line">      <span class="attr">&quot;name&quot;</span>: <span class="string">&quot;Luke Skywalker&quot;</span></span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="attr">&quot;jediHero&quot;</span>: &#123;</span><br><span class="line">      <span class="attr">&quot;name&quot;</span>: <span class="string">&quot;R2-D2&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在上面，两个 hero 字段有冲突，但我们可以分别给它们起个别名，这样可以用一个请求就能同时得到这两个结果。</p>
+<h2 id="8-执行修改"><a href="#8-执行修改" class="headerlink" title="8. 执行修改"></a>8. 执行修改</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">[query(查询)&#x2F;mutation(增删改)&#x2F;subscription(订阅)] 操作名称($isn:ISN(这个可以是&#x3D;赋默认值也可以是变量))&#123;</span><br><span class="line">	book(isn: $isn)&#123;</span><br><span class="line">		code</span><br><span class="line">		message</span><br><span class="line">		data:&#123;</span><br><span class="line">    		isn</span><br><span class="line">    		publisher</span><br><span class="line">    		[authors]</span><br><span class="line">    		publishedDate</span><br><span class="line">    	&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>和查询的区别是：查询是并行执行，修改是一个接一个地被执行</p>
+<h2 id="9-指令：Directives"><a href="#9-指令：Directives" class="headerlink" title="9.指令：Directives"></a>9.指令：Directives</h2><p>使用指令，配合变量，可以动态地改变查询的结构。假设一个界面组件，有一个摘要视图跟详情视图，为这个组件构建一个查询：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">query Hero($episode: Episode, $withFriends: Boolean!) &#123;</span><br><span class="line">  hero(episode: $episode) &#123;</span><br><span class="line">    name</span><br><span class="line">    friends @include(if: $withFriends) &#123;</span><br><span class="line">      name</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>变量：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  &quot;episode&quot;: &quot;JEDI&quot;,</span><br><span class="line">  &quot;withFriends&quot;: false</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>数据：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="attr">&quot;data&quot;</span>: &#123;</span><br><span class="line">    <span class="attr">&quot;hero&quot;</span>: &#123;</span><br><span class="line">      <span class="attr">&quot;name&quot;</span>: <span class="string">&quot;R2-D2&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>如果把变量中的 withFriends 的值设置成 true，那返回的查询结果应该是：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="attr">&quot;data&quot;</span>: &#123;</span><br><span class="line">    <span class="attr">&quot;hero&quot;</span>: &#123;</span><br><span class="line">      <span class="attr">&quot;name&quot;</span>: <span class="string">&quot;R2-D2&quot;</span>,</span><br><span class="line">      <span class="attr">&quot;friends&quot;</span>: [</span><br><span class="line">        &#123;</span><br><span class="line">          <span class="attr">&quot;name&quot;</span>: <span class="string">&quot;Luke Skywalker&quot;</span></span><br><span class="line">        &#125;,</span><br><span class="line">        &#123;</span><br><span class="line">          <span class="attr">&quot;name&quot;</span>: <span class="string">&quot;Han Solo&quot;</span></span><br><span class="line">        &#125;,</span><br><span class="line">        &#123;</span><br><span class="line">          <span class="attr">&quot;name&quot;</span>: <span class="string">&quot;Leia Organa&quot;</span></span><br><span class="line">        &#125;</span><br><span class="line">      ]</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>GraphQL 有两个指令：</p>
+<ol>
+<li>*@include(if: Boolean)*，如果参数的值是 true 才会在查询结果中包含字段。</li>
+<li>*@skip(if: Boolean)*，参数的值如果是 true，忽略这个字段。</li>
+</ol>
+<h1 id="四、SpringBoot构造器方式使用GraphQL"><a href="#四、SpringBoot构造器方式使用GraphQL" class="headerlink" title="四、SpringBoot构造器方式使用GraphQL"></a>四、SpringBoot构造器方式使用GraphQL</h1><h2 id="1-引入依赖-1"><a href="#1-引入依赖-1" class="headerlink" title="1. 引入依赖"></a>1. 引入依赖</h2><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">     <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.boot<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">     <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-boot-starter-web<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">     <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>io.leangen.graphql<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">     <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>graphql-spqr-spring-boot-starter<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">     <span class="tag">&lt;<span class="name">version</span>&gt;</span>0.0.4<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h2 id="2-直接通过注解定义GraphQL的操作源"><a href="#2-直接通过注解定义GraphQL的操作源" class="headerlink" title="2. 直接通过注解定义GraphQL的操作源"></a>2. 直接通过注解定义GraphQL的操作源</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@GraphQLApi</span><span class="comment">//作为操作源</span></span><br><span class="line"><span class="meta">@Service</span></span><br><span class="line"><span class="meta">@WithResolverBuilder(AnnotatedResolverBuilder.class)</span><span class="comment">//仅公开注释的方法</span></span><br><span class="line"><span class="comment">//@WithResolverBuilder(PublicResolverBuilder.class)//仅公开public操作源类中的所有方法（返回void的方法被认为是mutation）</span></span><br><span class="line"><span class="comment">//@WithResolverBuilder(BeanResolverBuilder.class)//将所有getter暴露为query和setter作为mutation（getters返回Publisher&lt;T&gt;被视为订阅）</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">BookService</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    BookReposity bookReposity;</span><br><span class="line"><span class="comment">//    @Resource</span></span><br><span class="line"><span class="comment">//    BookMapper bookMapper;</span></span><br><span class="line"></span><br><span class="line">    <span class="meta">@GraphQLMutation(name = &quot;insertBook&quot;)</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> ApiResponse <span class="title">createBook</span><span class="params">(<span class="meta">@GraphQLArgument(name = &quot;book&quot;)</span>Book book)</span></span>&#123;</span><br><span class="line">        bookReposity.save(book);</span><br><span class="line">        <span class="keyword">return</span> ApiResponse.ofSuccess();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@GraphQLQuery(name = &quot;allBooks&quot;)</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Collection&lt;Book&gt; <span class="title">books</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> bookReposity.findAll();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@GraphQLQuery(name = &quot;book&quot;)</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Book <span class="title">book</span><span class="params">(String isn)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> bookReposity.findById(isn).get();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@GraphQLMutation(name = &quot;deleteBook&quot;)</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> ApiResponse <span class="title">deleteBook</span><span class="params">(<span class="meta">@GraphQLArgument(name = &quot;id&quot;)</span> String  isn)</span></span>&#123;</span><br><span class="line">        bookReposity.deleteById(isn);</span><br><span class="line">        <span class="keyword">return</span> ApiResponse.ofSuccess();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@GraphQLMutation(name = &quot;updateBook&quot;)</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> ApiResponse <span class="title">updateBook</span><span class="params">(<span class="meta">@GraphQLArgument(name = &quot;id&quot;)</span> String  isn, <span class="meta">@GraphQLArgument(name = &quot;title&quot;)</span> String  title)</span></span>&#123;</span><br><span class="line">        Book book = <span class="keyword">new</span> Book();</span><br><span class="line">        book.setIsn(isn);</span><br><span class="line">        book.setTitle(title);</span><br><span class="line">        bookReposity.save(book);</span><br><span class="line">        <span class="keyword">return</span> ApiResponse.ofSuccess();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="3-可以在实体字段上进行Graph字段的映射"><a href="#3-可以在实体字段上进行Graph字段的映射" class="headerlink" title="3. 可以在实体字段上进行Graph字段的映射"></a>3. 可以在实体字段上进行Graph字段的映射</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@GraphQLQuery(name = &quot;orgCode&quot;, description = &quot;机构代码&quot;)</span></span><br><span class="line"><span class="keyword">private</span> String orgCode;</span><br></pre></td></tr></table></figure>
+<h2 id="4-可以启用gui进行Graph请求"><a href="#4-可以启用gui进行Graph请求" class="headerlink" title="4. 可以启用gui进行Graph请求"></a>4. 可以启用gui进行Graph请求</h2><p>在application.properties中添加</p>
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">server.port</span>=<span class="string">8091</span></span><br><span class="line">    <span class="meta">graphql.spqr.gui.enabled</span>=<span class="string">true</span></span><br></pre></td></tr></table></figure>
+<p>然后请求<a target="_blank" rel="noopener" href="http://localhost:8091/gui%E8%BF%9B%E5%85%A5Graph%E8%AF%B7%E6%B1%82%E7%95%8C%E9%9D%A2">http://localhost:8091/gui进入Graph请求界面</a></p>
+<p>请求</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line">#删除</span><br><span class="line">mutation&#123;</span><br><span class="line">	deleteBook(id:&quot;123&quot;)&#123;</span><br><span class="line">	code</span><br><span class="line">    message</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line">#增加</span><br><span class="line">mutation&#123;</span><br><span class="line">	insertBook(</span><br><span class="line">    book:&#123;</span><br><span class="line">      isn:&quot;123&quot;</span><br><span class="line">      title:&quot;ddd&quot;</span><br><span class="line">      publisher:&quot;人民公社&quot;</span><br><span class="line">      authors: [&quot;chl&quot;]</span><br><span class="line">      publishedDate:&quot;1996-12-13&quot;</span><br><span class="line">    &#125;</span><br><span class="line">  )</span><br><span class="line">  &#123;</span><br><span class="line">		code</span><br><span class="line">    message</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">#查询</span><br><span class="line">    query&#123;</span><br><span class="line">        allBooks&#123;</span><br><span class="line">        isn</span><br><span class="line">        title</span><br><span class="line">        &#125;</span><br><span class="line">        book(isn:&quot;124&quot;)&#123;</span><br><span class="line">        isn</span><br><span class="line">        title</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">#修改</span><br><span class="line">mutation&#123;</span><br><span class="line">	updateBook(id:&quot;123&quot;,title:&quot;ddd&quot;)&#123;</span><br><span class="line">	code</span><br><span class="line">    message</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+
+
+
+
+
+
+      
+
+      
+        <div class="page-reward">
+          <a href="javascript:;" class="page-reward-btn tooltip-top">
+            <div class="tooltip tooltip-east">
+            <span class="tooltip-item">
+              赏
+            </span>
+            <span class="tooltip-content">
+              <span class="tooltip-text">
+                <span class="tooltip-inner">
+                  <p class="reward-p"><i class="icon icon-quo-left"></i>谢谢你请我吃糖果<i class="icon icon-quo-right"></i></p>
+                  <div class="reward-box">
+                    
+                    
+                  </div>
+                </span>
+              </span>
+            </span>
+          </div>
+          </a>
+        </div>
+      
+    </div>
+    <div class="article-info article-info-index">
       
       
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2021" class="archive-year">2021</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/01/20/%E7%BC%93%E5%AD%98/" class="archive-article-date">
-  	<time datetime="2021-01-20T03:16:57.782Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-01-20</time>
-</a>
-        </div>
-    	 
-        <div class="article-info info-on-right">
-          
-          
+      
 
+      
+
+      
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
         </div>
-        <div class="clearfix"></div>
-    </header>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//pan.baidu.com/share/qrcode?url=http://example.com/2021/01/20/graphql/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
+      
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/01/20/%E5%93%8D%E5%BA%94%E5%BC%8F%E7%BC%96%E7%A8%8B/" class="archive-article-date">
-  	<time datetime="2021-01-20T03:16:57.767Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-01-20</time>
-</a>
-        </div>
-    	 
-        <div class="article-info info-on-right">
-          
-          
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
   
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/01/20/%E5%88%86%E5%B8%83%E5%BC%8F%E4%B8%80%E8%87%B4%E6%80%A7%E9%97%AE%E9%A2%98/" class="archive-article-date">
-  	<time datetime="2021-01-20T03:16:57.761Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-01-20</time>
-</a>
-        </div>
-    	 
-        <div class="article-info info-on-right">
-          
-          
+<nav id="article-nav">
+  
+    <a href="/2021/01/20/java%E5%B9%B6%E5%8F%91%E5%9F%BA%E7%A1%80/" id="article-nav-newer" class="article-nav-link-wrap">
+      <i class="icon-circle-left"></i>
+      <div class="article-nav-title">
+        
+          (no title)
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2021/01/20/flink/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title"></div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/01/20/rockermq%E5%AE%95%E6%9C%BA%E5%8F%8A%E9%87%8D%E5%A4%8D%E6%B6%88%E8%B4%B9%E9%97%AE%E9%A2%98/" class="archive-article-date">
-  	<time datetime="2021-01-20T03:16:57.756Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-01-20</time>
-</a>
-        </div>
-    	 
-        <div class="article-info info-on-right">
-          
-          
 
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
         </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/01/20/nacos/" class="archive-article-date">
-  	<time datetime="2021-01-20T03:16:57.751Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-01-20</time>
-</a>
-        </div>
-    	 
-        <div class="article-info info-on-right">
-          
-          
+        
+        
+    </div>
+</aside>
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/01/20/linux/" class="archive-article-date">
-  	<time datetime="2021-01-20T03:16:57.744Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-01-20</time>
-</a>
-        </div>
-    	 
-        <div class="article-info info-on-right">
-          
-          
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/01/20/jvm/" class="archive-article-date">
-  	<time datetime="2021-01-20T03:16:57.738Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-01-20</time>
-</a>
-        </div>
-    	 
-        <div class="article-info info-on-right">
-          
-          
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/01/20/java%E5%B9%B6%E5%8F%91%E5%9F%BA%E7%A1%80/" class="archive-article-date">
-  	<time datetime="2021-01-20T03:16:57.731Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-01-20</time>
-</a>
-        </div>
-    	 
-        <div class="article-info info-on-right">
-          
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/01/20/graphql/" class="archive-article-date">
-  	<time datetime="2021-01-20T03:16:57.723Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-01-20</time>
-</a>
-        </div>
-    	 
-        <div class="article-info info-on-right">
-          
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/01/20/flink/" class="archive-article-date">
-  	<time datetime="2021-01-20T03:16:57.716Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-01-20</time>
-</a>
-        </div>
-    	 
-        <div class="article-info info-on-right">
-          
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
   
   
-    </div></section>
   
 
-    
-    <nav id="page-nav">
-      <span class="page-number current">1</span><a class="page-number" href="/archives/page/2/">2</a><a class="page-number" href="/archives/page/3/">3</a><a class="extend next" rel="next" href="/archives/page/2/">Next &amp;raquo;</a>
-    </nav>
+  
+
+  
+
   
 
 
@@ -402,8 +419,8 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
-		isArchive: true,
+		isPost: true,
+		isArchive: false,
 		isTag: false,
 		isCategory: false,
 		open_in_new: false,

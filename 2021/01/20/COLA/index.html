@@ -6,13 +6,17 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://example.com">
-  <title>Archives | Hexo</title>
+  <title>Hexo</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta property="og:type" content="website">
+  <meta name="description" content="一、COLA框架解决了哪些问题  应用的层次结构混乱：不知道应用应该如何分层、应该包含哪些组件、组件之间的关系是什么； 缺少规范的指导和约束：新加一段业务逻辑不知道放在什么地方（哪个类，哪个包）、应该起什么名字比较合适？  二、COLA2.0中的组件 模块和组件的定义 模块（Module）： 和Maven中Module定义保持一致，简单理解就是Jar。 组件（Component）：和UML中的定义">
+<meta property="og:type" content="article">
 <meta property="og:title" content="Hexo">
-<meta property="og:url" content="http://example.com/archives/index.html">
+<meta property="og:url" content="http://example.com/2021/01/20/COLA/index.html">
 <meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="一、COLA框架解决了哪些问题  应用的层次结构混乱：不知道应用应该如何分层、应该包含哪些组件、组件之间的关系是什么； 缺少规范的指导和约束：新加一段业务逻辑不知道放在什么地方（哪个类，哪个包）、应该起什么名字比较合适？  二、COLA2.0中的组件 模块和组件的定义 模块（Module）： 和Maven中Module定义保持一致，简单理解就是Jar。 组件（Component）：和UML中的定义">
 <meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2021-01-20T03:16:57.616Z">
+<meta property="article:modified_time" content="2021-01-20T03:16:57.616Z">
 <meta property="article:author" content="John Doe">
 <meta name="twitter:card" content="summary">
   
@@ -150,235 +154,278 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
-  
-  
+            <article id="post-COLA" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
     
-    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>一、COLA框架解决了哪些问题</p>
+<ul>
+<li>应用的层次结构混乱：不知道应用应该如何分层、应该包含哪些组件、组件之间的关系是什么；</li>
+<li>缺少规范的指导和约束：新加一段业务逻辑不知道放在什么地方（哪个类，哪个包）、应该起什么名字比较合适？</li>
+</ul>
+<p>二、COLA2.0中的组件</p>
+<p>模块和组件的定义</p>
+<p>模块（Module）： 和Maven中Module定义保持一致，简单理解就是Jar。</p>
+<p>组件（Component）：和UML中的定义类似，简单理解就是Package。</p>
+<p>cola中模块和组件的关系</p>
+<ol>
+<li>Client二方库模块<ul>
+<li>api:存放的是应用对外的接口</li>
+<li>dto.domainmodel：用来做数据传输的轻量级领域对象</li>
+<li>dto.domainevent: 用来做数据传输的领域事件</li>
+</ul>
+</li>
+<li>Application模块<ul>
+<li>service：接口实现的facade，没有业务逻辑，可以包含对不同终端的adapter</li>
+<li>eventhandler：处理领域事件，包括本域的和外域的</li>
+<li>executor：用来处理命令（Command）和查询（Query），对复杂业务，可以包含Phase和Step</li>
+<li>interceptor: COLA提供的对所有请求的AOP处理机制</li>
+</ul>
+</li>
+<li>Domain模块<ul>
+<li>domain：领域实体，允许继承domainmodel</li>
+<li>domainservice: 领域服务，用来提供更粗粒度的领域能力</li>
+<li>gateway：对外依赖的网关接口，包括存储、RPC、Search等</li>
+</ul>
+</li>
+<li>Infrastructure<ul>
+<li>config：配置信息相关</li>
+<li>message：消息处理相关</li>
+<li>repository：存储相关，是gateway的特化，主要用来做本域的数据CRUD操作</li>
+<li>gateway：对外依赖的网关接口（Domain里的gateway）的实现</li>
+</ul>
+</li>
+</ol>
+<p>三、COLA中业务定位的设计</p>
+<p>业务身份的三个概念：</p>
+<ol>
+<li>业务就是一个自负盈亏的财务主体，比如tmall、淘宝和零售通就是三个不同的业务。</li>
+<li>用例描述了用户和系统之间的互动，每个用例提供了一个或多个场景。比如，支付订单就是一个典型的用例</li>
+<li>场景场景也被称为用例的实例（Instance），包括用例所有的可能情况（正常的和异常的）。比如对于“订单支付”这个用例，就有“可以使用花呗”，“支付宝余额不足”，“银行账户余额不足”等多个场景</li>
+</ol>
+<p>四、项目结构及请求流程</p>
+<ol>
+<li>项目结构</li>
+</ol>
+<p>cola-framework</p>
+<pre><code>cola-common
+
+cola-core
+
+cola-test</code></pre>
+<p>sample</p>
+<pre><code>app-&gt;client、domain
+
+client-&gt;cola-common（可以定义在cola-framework中）
+
+controller-&gt;app、cola-test
+
+domain-&gt;infrastructure、client、cola-test
+
+infrastructure-&gt;cola-core、cola-test
+
+start-&gt;controller、cola-test</code></pre>
+<ol start="2">
+<li><p>请求流程</p>
+</li>
+<li><p>controller中调用client中的接口</p>
+</li>
+<li><p>接口在app中@Service注解下实现(发送消息到命令总线)</p>
+</li>
+<li><p>app中从命令总线读取命令执行（需要实现CommandExecutorI接口并加@Command注解）</p>
+</li>
+<li><p>app执行命令时</p>
+<ul>
+<li>对于复杂业务可以多抽离一层Repository层</li>
+<li>调用infrastructure中持久层/rpc层操作接口Tunnel</li>
+<li>调用domain实体的方法进行领域内操作</li>
+<li>调用infrastructure中DomainEventPublisher将事件发布到事件总线</li>
+<li>事件总线中的消息在app@EventHandler标注的事件处理器中处理<ul>
+<li>处理时需要调用client中Service方法(实现方法同样在app中，执行发送命令)</li>
+<li>对于简单业务可以直接调用infrastructure中Tunnel</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<p>命令总线和事件总线发布方和处理方的绑定关系通过参数来区分，两个总线的区别是 命令总线是同步的，而事件总线是异步的。</p>
+<p>五、实体类定义位置及用法</p>
+<p>六、注解使用</p>
+<p>七、COLA项目初始化流程</p>
+<ol>
+<li>在infrastructure中定义初始化配置：注册一个Bootstrap Bean，定义扫描的包路径在groupId</li>
+<li>调用Bootstrap的初始化方法init();<ul>
+<li>init方法先执行包扫描，获取当前包路径下所有子路径，判断文件是否是文件夹，文件夹则迭代调用包扫描方法；如果是文件则将完整的文件路径保存到Set中</li>
+<li>再执行注册bean，判断Set里的类是否有PreInterceptor(前置拦截器)、PostInterceptor(后置拦截器)、Command(命令)、Extension(拓展点)、EventHandler(事件处理器)注解标注，如果有就返回对应的注册器，执行注册</li>
+<li>注册到CommandHub（包含全局前置过滤器list,全局后置过滤器list,命令调用map,命令返回类map）<ul>
+<li>命令将&lt;Class<Command>,Class<Response>&gt;作为一个map项放入responseRepository中然后创建一个命令调用类，设置执行器为类本身，前置拦截器和后置拦截器，将命令类作为key，命令调用类作为value,放入commandRepository中</li>
+<li>前置过滤器、后置过滤器添加到对应的list中</li>
+</ul>
+</li>
+<li>注册到EventHub（包含事件调用map,事件返回类map(空)）<ul>
+<li>事件将&lt;Class<DomainEvent>,Class<EventHandler>&gt;存入eventRepository中</li>
+</ul>
+</li>
+<li>注册到ExtensionRepository(包含拓展点map)<ul>
+<li>拓展点将</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<p>八、模块详解</p>
+<ol>
+<li>Client二方库模块</li>
+</ol>
+<p>关于二方库的定位表面上来看，是一个简单问题，因为服务的二方库无外乎就是用来暴露接口和传递数据的DTO。不过，往深层次思考，它并不是一个简单的问题，因为它涉及到不同界限上下文（Bounded Context）之间的协作问题。</p>
+<p>如何实现不同域之间的协作，同时又要保证各自领域的概念的完整性？</p>
+<ol>
+<li>共享内核<br>优点：减少重复建设<br>缺点：团队之间紧耦合</li>
+<li>防腐层（ACL）<br>下游和上游之间创建一层转换层<br>优点：完全解耦，各自独立<br>缺点：有一定的转换成本</li>
+</ol>
+<p>二方库的职责范围是什么？</p>
+<ol>
+<li>二方库中的domain model也是领域的重要组成部分</li>
+<li>在Domain层，可以适当考虑继承二方库中的领域能力，可以继承也可以Wrap</li>
+</ol>
+
+      
+
+      
+        <div class="page-reward">
+          <a href="javascript:;" class="page-reward-btn tooltip-top">
+            <div class="tooltip tooltip-east">
+            <span class="tooltip-item">
+              赏
+            </span>
+            <span class="tooltip-content">
+              <span class="tooltip-text">
+                <span class="tooltip-inner">
+                  <p class="reward-p"><i class="icon icon-quo-left"></i>谢谢你请我吃糖果<i class="icon icon-quo-right"></i></p>
+                  <div class="reward-box">
+                    
+                    
+                  </div>
+                </span>
+              </span>
+            </span>
+          </div>
+          </a>
+        </div>
+      
+    </div>
+    <div class="article-info article-info-index">
       
       
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2021" class="archive-year">2021</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/01/20/%E7%BC%93%E5%AD%98/" class="archive-article-date">
-  	<time datetime="2021-01-20T03:16:57.782Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-01-20</time>
-</a>
-        </div>
-    	 
-        <div class="article-info info-on-right">
-          
-          
+      
 
+      
+
+      
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
         </div>
-        <div class="clearfix"></div>
-    </header>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//pan.baidu.com/share/qrcode?url=http://example.com/2021/01/20/COLA/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
+      
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/01/20/%E5%93%8D%E5%BA%94%E5%BC%8F%E7%BC%96%E7%A8%8B/" class="archive-article-date">
-  	<time datetime="2021-01-20T03:16:57.767Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-01-20</time>
-</a>
-        </div>
-    	 
-        <div class="article-info info-on-right">
-          
-          
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
   
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/01/20/%E5%88%86%E5%B8%83%E5%BC%8F%E4%B8%80%E8%87%B4%E6%80%A7%E9%97%AE%E9%A2%98/" class="archive-article-date">
-  	<time datetime="2021-01-20T03:16:57.761Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-01-20</time>
-</a>
-        </div>
-    	 
-        <div class="article-info info-on-right">
-          
-          
+<nav id="article-nav">
+  
+    <a href="/2021/01/20/Dubbo%E3%80%81Netty%E3%80%81JMS%E3%80%81AMQP/" id="article-nav-newer" class="article-nav-link-wrap">
+      <i class="icon-circle-left"></i>
+      <div class="article-nav-title">
+        
+          (no title)
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2021/01/20/Arthas/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title"></div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/01/20/rockermq%E5%AE%95%E6%9C%BA%E5%8F%8A%E9%87%8D%E5%A4%8D%E6%B6%88%E8%B4%B9%E9%97%AE%E9%A2%98/" class="archive-article-date">
-  	<time datetime="2021-01-20T03:16:57.756Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-01-20</time>
-</a>
-        </div>
-    	 
-        <div class="article-info info-on-right">
-          
-          
 
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
         </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/01/20/nacos/" class="archive-article-date">
-  	<time datetime="2021-01-20T03:16:57.751Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-01-20</time>
-</a>
-        </div>
-    	 
-        <div class="article-info info-on-right">
-          
-          
+        
+        
+    </div>
+</aside>
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/01/20/linux/" class="archive-article-date">
-  	<time datetime="2021-01-20T03:16:57.744Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-01-20</time>
-</a>
-        </div>
-    	 
-        <div class="article-info info-on-right">
-          
-          
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/01/20/jvm/" class="archive-article-date">
-  	<time datetime="2021-01-20T03:16:57.738Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-01-20</time>
-</a>
-        </div>
-    	 
-        <div class="article-info info-on-right">
-          
-          
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/01/20/java%E5%B9%B6%E5%8F%91%E5%9F%BA%E7%A1%80/" class="archive-article-date">
-  	<time datetime="2021-01-20T03:16:57.731Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-01-20</time>
-</a>
-        </div>
-    	 
-        <div class="article-info info-on-right">
-          
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/01/20/graphql/" class="archive-article-date">
-  	<time datetime="2021-01-20T03:16:57.723Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-01-20</time>
-</a>
-        </div>
-    	 
-        <div class="article-info info-on-right">
-          
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/01/20/flink/" class="archive-article-date">
-  	<time datetime="2021-01-20T03:16:57.716Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-01-20</time>
-</a>
-        </div>
-    	 
-        <div class="article-info info-on-right">
-          
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
   
   
-    </div></section>
   
 
-    
-    <nav id="page-nav">
-      <span class="page-number current">1</span><a class="page-number" href="/archives/page/2/">2</a><a class="page-number" href="/archives/page/3/">3</a><a class="extend next" rel="next" href="/archives/page/2/">Next &amp;raquo;</a>
-    </nav>
+  
+
+  
+
   
 
 
@@ -402,8 +449,8 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
-		isArchive: true,
+		isPost: true,
+		isArchive: false,
 		isTag: false,
 		isCategory: false,
 		open_in_new: false,
