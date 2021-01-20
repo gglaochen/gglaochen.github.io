@@ -6,18 +6,19 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://example.com">
-  <title>Hexo</title>
+  <title>缓存 | Hexo</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="description" content="一、本地缓存本地缓存的特性，目前无法很好的解决不同服务器之间缓存同步的问题，所以在一致性要求高的场合，建议使用Redis，memcached等集中式缓存。  1. EhcacheEhcache是一个用Java实现的使用简单，告诉，线程安全的缓存管理类库。Ehcache具有快速、简单、低消耗、依赖性小等特点。 1.1 主要特点 快速、简单 过去众多测试已经证明Ehcache是最快的Java缓存之一，">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Hexo">
+<meta property="og:title" content="缓存">
 <meta property="og:url" content="http://example.com/2021/01/20/%E7%BC%93%E5%AD%98/index.html">
 <meta property="og:site_name" content="Hexo">
 <meta property="og:description" content="一、本地缓存本地缓存的特性，目前无法很好的解决不同服务器之间缓存同步的问题，所以在一致性要求高的场合，建议使用Redis，memcached等集中式缓存。  1. EhcacheEhcache是一个用Java实现的使用简单，告诉，线程安全的缓存管理类库。Ehcache具有快速、简单、低消耗、依赖性小等特点。 1.1 主要特点 快速、简单 过去众多测试已经证明Ehcache是最快的Java缓存之一，">
 <meta property="og:locale" content="en_US">
-<meta property="article:published_time" content="2021-01-20T03:16:57.782Z">
-<meta property="article:modified_time" content="2021-01-20T03:16:57.782Z">
+<meta property="article:published_time" content="2021-01-19T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-01-20T06:06:27.299Z">
 <meta property="article:author" content="John Doe">
+<meta property="article:tag" content="java基础">
 <meta name="twitter:card" content="summary">
   
     <link rel="alternative" href="/atom.xml" title="Hexo" type="application/atom+xml">
@@ -157,6 +158,21 @@
             <article id="post-缓存" class="article article-type-post " itemscope itemprop="blogPost">
   <div class="article-inner">
     
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      缓存
+    </h1>
+  
+
+        
+        <a href="/2021/01/20/%E7%BC%93%E5%AD%98/" class="archive-article-date">
+  	<time datetime="2021-01-19T16:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-01-20</time>
+</a>
+        
+      </header>
+    
     <div class="article-entry" itemprop="articleBody">
       
         <h1 id="一、本地缓存"><a href="#一、本地缓存" class="headerlink" title="一、本地缓存"></a>一、本地缓存</h1><p>本地缓存的特性，目前无法很好的解决不同服务器之间缓存同步的问题，所以在一致性要求高的场合，建议使用Redis，memcached等集中式缓存。 </p>
@@ -279,6 +295,17 @@
     <div class="article-info article-info-index">
       
       
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">java基础</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
       
 
       
@@ -343,9 +370,18 @@
   
 <nav id="article-nav">
   
+    <a href="/2021/01/20/%E5%93%8D%E5%BA%94%E5%BC%8F%E7%BC%96%E7%A8%8B/" id="article-nav-newer" class="article-nav-link-wrap">
+      <i class="icon-circle-left"></i>
+      <div class="article-nav-title">
+        
+          响应式编程
+        
+      </div>
+    </a>
   
-    <a href="/2021/01/20/%E5%93%8D%E5%BA%94%E5%BC%8F%E7%BC%96%E7%A8%8B/" id="article-nav-older" class="article-nav-link-wrap">
-      <div class="article-nav-title"></div>
+  
+    <a href="/2021/01/20/ElasticJob%E3%80%81xxl-job/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">ElasticJob、xxl-job</div>
       <i class="icon-circle-right"></i>
     </a>
   
@@ -469,6 +505,26 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
             <input type="checkbox" q-on="click:toggleTag(e)" q-attr="checked:showTags">
           </label>
           <ul class="article-tag-list" q-show="showTags">
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">测试</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">服务器</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">大数据</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">java基础</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">框架及中间件</a>
+              </li>
             
             <div class="clearfix"></div>
           </ul>

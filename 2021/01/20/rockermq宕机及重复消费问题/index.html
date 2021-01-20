@@ -6,18 +6,19 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://example.com">
-  <title>Hexo</title>
+  <title>RocketMq宕机及重复消费问题 | Hexo</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="description" content="一、宕机 消息消费的具体流程是什么？rocketmq消息是pull模式，如果master正常，则从master上拉取消息；如果master挂掉，会从slave上拉取消息（虽然slave不能写消息，但是可用写消费进度）在broker和消费端都正常的情况下，消费端在拉取到消息后，每消费完一批消息（批的大小consumeMessageBatchMaxSize在DefaultMQPushConsumer中">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Hexo">
+<meta property="og:title" content="RocketMq宕机及重复消费问题">
 <meta property="og:url" content="http://example.com/2021/01/20/rockermq%E5%AE%95%E6%9C%BA%E5%8F%8A%E9%87%8D%E5%A4%8D%E6%B6%88%E8%B4%B9%E9%97%AE%E9%A2%98/index.html">
 <meta property="og:site_name" content="Hexo">
 <meta property="og:description" content="一、宕机 消息消费的具体流程是什么？rocketmq消息是pull模式，如果master正常，则从master上拉取消息；如果master挂掉，会从slave上拉取消息（虽然slave不能写消息，但是可用写消费进度）在broker和消费端都正常的情况下，消费端在拉取到消息后，每消费完一批消息（批的大小consumeMessageBatchMaxSize在DefaultMQPushConsumer中">
 <meta property="og:locale" content="en_US">
-<meta property="article:published_time" content="2021-01-20T03:16:57.756Z">
-<meta property="article:modified_time" content="2021-01-20T03:16:57.756Z">
+<meta property="article:published_time" content="2021-01-19T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-01-20T06:09:09.504Z">
 <meta property="article:author" content="John Doe">
+<meta property="article:tag" content="框架及中间件">
 <meta name="twitter:card" content="summary">
   
     <link rel="alternative" href="/atom.xml" title="Hexo" type="application/atom+xml">
@@ -157,6 +158,21 @@
             <article id="post-rockermq宕机及重复消费问题" class="article article-type-post " itemscope itemprop="blogPost">
   <div class="article-inner">
     
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      RocketMq宕机及重复消费问题
+    </h1>
+  
+
+        
+        <a href="/2021/01/20/rockermq%E5%AE%95%E6%9C%BA%E5%8F%8A%E9%87%8D%E5%A4%8D%E6%B6%88%E8%B4%B9%E9%97%AE%E9%A2%98/" class="archive-article-date">
+  	<time datetime="2021-01-19T16:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-01-20</time>
+</a>
+        
+      </header>
+    
     <div class="article-entry" itemprop="articleBody">
       
         <h1 id="一、宕机"><a href="#一、宕机" class="headerlink" title="一、宕机"></a>一、宕机</h1><ul>
@@ -212,6 +228,17 @@
     <div class="article-info article-info-index">
       
       
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">框架及中间件</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
       
 
       
@@ -276,18 +303,18 @@
   
 <nav id="article-nav">
   
-    <a href="/2021/01/20/%E5%88%86%E5%B8%83%E5%BC%8F%E4%B8%80%E8%87%B4%E6%80%A7%E9%97%AE%E9%A2%98/" id="article-nav-newer" class="article-nav-link-wrap">
+    <a href="/2021/01/20/nacos/" id="article-nav-newer" class="article-nav-link-wrap">
       <i class="icon-circle-left"></i>
       <div class="article-nav-title">
         
-          (no title)
+          nacos
         
       </div>
     </a>
   
   
-    <a href="/2021/01/20/nacos/" id="article-nav-older" class="article-nav-link-wrap">
-      <div class="article-nav-title"></div>
+    <a href="/2021/01/20/%E5%88%86%E5%B8%83%E5%BC%8F%E4%B8%80%E8%87%B4%E6%80%A7%E9%97%AE%E9%A2%98/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">分布式一致性问题</div>
       <i class="icon-circle-right"></i>
     </a>
   
@@ -411,6 +438,26 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
             <input type="checkbox" q-on="click:toggleTag(e)" q-attr="checked:showTags">
           </label>
           <ul class="article-tag-list" q-show="showTags">
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">测试</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">服务器</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">大数据</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">java基础</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">框架及中间件</a>
+              </li>
             
             <div class="clearfix"></div>
           </ul>

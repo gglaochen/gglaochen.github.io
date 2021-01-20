@@ -6,14 +6,19 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://example.com">
-  <title>Archives: 2021/1 | Hexo</title>
+  <title>cms及静态化 | Hexo</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta property="og:type" content="website">
-<meta property="og:title" content="Hexo">
-<meta property="og:url" content="http://example.com/archives/2021/01/page/3/index.html">
+  <meta name="description" content="cmd及静态化教学视频：https:&#x2F;&#x2F;www.bilibili.com&#x2F;video&#x2F;av41227405?p&#x3D;88 cms需求分析cms系统的定位是对页面进行管理，功能就是根据运营的需要(首页广告、门户页面样式)而需要快速上线的功能页面进行管理 实现流程一个页面等于模板加数据，页面静态化技术就是通过程序，将数据通过技术手段渲染到页面模板中，通过静态化技术重新生成新的html页面，页面静态化后存放">
+<meta property="og:type" content="article">
+<meta property="og:title" content="cms及静态化">
+<meta property="og:url" content="http://example.com/2021/01/20/cms%E5%8F%8A%E9%9D%99%E6%80%81%E5%8C%96/index.html">
 <meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="cmd及静态化教学视频：https:&#x2F;&#x2F;www.bilibili.com&#x2F;video&#x2F;av41227405?p&#x3D;88 cms需求分析cms系统的定位是对页面进行管理，功能就是根据运营的需要(首页广告、门户页面样式)而需要快速上线的功能页面进行管理 实现流程一个页面等于模板加数据，页面静态化技术就是通过程序，将数据通过技术手段渲染到页面模板中，通过静态化技术重新生成新的html页面，页面静态化后存放">
 <meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2021-01-19T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-01-20T06:09:09.438Z">
 <meta property="article:author" content="John Doe">
+<meta property="article:tag" content="框架及中间件">
 <meta name="twitter:card" content="summary">
   
     <link rel="alternative" href="/atom.xml" title="Hexo" type="application/atom+xml">
@@ -150,36 +155,166 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
-  
-  
+            <article id="post-cms及静态化" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
     
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      cms及静态化
+    </h1>
+  
+
+        
+        <a href="/2021/01/20/cms%E5%8F%8A%E9%9D%99%E6%80%81%E5%8C%96/" class="archive-article-date">
+  	<time datetime="2021-01-19T16:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-01-20</time>
+</a>
+        
+      </header>
     
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>cmd及静态化教学视频：<a target="_blank" rel="noopener" href="https://www.bilibili.com/video/av41227405?p=88">https://www.bilibili.com/video/av41227405?p=88</a></p>
+<h1 id="cms需求分析"><a href="#cms需求分析" class="headerlink" title="cms需求分析"></a>cms需求分析</h1><p>cms系统的定位是对页面进行管理，功能就是根据运营的需要(首页广告、门户页面样式)而需要快速上线的功能页面进行管理</p>
+<h1 id="实现流程"><a href="#实现流程" class="headerlink" title="实现流程"></a>实现流程</h1><p>一个页面等于模板加数据，页面静态化技术就是通过程序，将数据通过技术手段渲染到页面模板中，通过静态化技术重新生成新的html页面，页面静态化后存放在文件系统中，当对页面进行发布时将页面从文件系统取出发布到服务器</p>
+<hr>
+<p>数据==静态化技术渲染==&gt;页面模板==生成==&gt;html页面==存储==&gt;文件系统==发布==&gt;不同服务器</p>
+<hr>
+<p>之所以要存储在文件系统而不是直接将html文件写在项目中是因为存储在文件系统中可以供多个集群服务器读取</p>
+<p><strong>页面信息</strong>：存储在mongo中，可以根据pageId拿到具体的页面数据</p>
+<p><strong>数据模型</strong>：给存储在mongo中的页面信息配置一个指定的dataUrl，请求后能获取对应的数据(列表或单个数据)</p>
+<p><strong>页面模板</strong>：给存储在mongo中的页面信息配合一个模板路径，从GridFS(mongo文件服务器)中拿到页面模板</p>
+<p><strong>静态化</strong>：通过FreeMarker技术生成html存储到文件系统</p>
+<p>需要的数据表：</p>
+<ol>
+<li>页面信息表：页面id，页面名称，模板文件id，dataUrl，创建人，类型(静态/动态)，删除标志</li>
+<li>数据模型表：页面id，数据名称，数据</li>
+<li>文件存储表：本地存储直接约定路径即可</li>
+</ol>
+<p>需要的接口：</p>
+<ol>
+<li><p>新增、修改、删除页面信息的接口，如果是静态，需要配置对应的dataUrl</p>
+</li>
+<li><p>给页面上传模板和pageId，修改对应pageId的模板文件id，如果之前存在模板，删除旧模板，将新模板上传到图片服务器</p>
+</li>
+<li><p>静态化接口，根据pageId获取页面dataUrl，请求数据模型，获取页面模板，执行静态化</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">getPageHtml</span><span class="params">(String pageId)</span></span>&#123;</span><br><span class="line">	Page page = getById(page);</span><br><span class="line">    <span class="comment">//...判断页面是不是空</span></span><br><span class="line">    <span class="comment">//...如果页面不是静态页面提示不是静态页面</span></span><br><span class="line">    Map model = restTemplate.getForEntity(page.getDataUrl,Map.class);</span><br><span class="line">    String templateId = page.getTemplateId();</span><br><span class="line">    <span class="comment">//...判断模板id是不是空</span></span><br><span class="line">    <span class="comment">//从文件系统读模板内容</span></span><br><span class="line">    String content = findById(templateId);</span><br><span class="line">    <span class="comment">//...判断模板是不是空</span></span><br><span class="line">    generateHTML(content,model);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">private</span> String <span class="title">generateHTML</span><span class="params">(String template,Map model)</span></span>&#123;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        	Configuration configuration = <span class="keyword">new</span> Configuration(Configuration.getVersion());</span><br><span class="line">        	StringTemplateLoader templateLoader = <span class="keyword">new</span> StringTemplateLoader();</span><br><span class="line">        	templateLoader.putTemplate(<span class="string">&quot;template&quot;</span>,template);</span><br><span class="line">        configuration.setTemplateLoader(templateLoader);</span><br><span class="line">            Template t = configuration.getTemplate(<span class="string">&quot;template&quot;</span>); <span class="comment">// freeMarker template</span></span><br><span class="line">            content = FreeMarkerTemplateUtils.processTemplateIntoString(t, model);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    <span class="keyword">return</span> content;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure></li>
+<li><p>页面预览接口</p>
+<p>除了以上静态化的接口，还需要将静态化的结果响应给浏览器，展示页面内容，这里可以结合Nginx实现集群</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@GetMapping(&quot;/cms/&#123;pageId&#125;&quot;)</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">preview</span> <span class="params">(<span class="meta">@PatchVariable(&quot;pageId&quot;)</span>String pageId,HttpRequest request,HttpResponse response)</span></span>&#123;</span><br><span class="line">    <span class="comment">//执行静态化</span></span><br><span class="line">    String html = getPageHtml(pageId);</span><br><span class="line">    ServletOutputStream outputStream = response.getOutputStream();</span><br><span class="line">    outputStream.write(pageHtml.getBytes(<span class="string">&quot;utf-8&quot;</span>));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li><p>页面发布</p>
+<p>页面发布服务执行页面静态化功能，将静态化文件(html)存储至文件服务器（异步回调），静态化成功后发送mq消息给每一个订阅主题的服务发送一个pageId，每个Cms服务器从文件服务器下载html文件</p>
+</li>
+</ol>
+<h1 id="GridFS文件系统"><a href="#GridFS文件系统" class="headerlink" title="GridFS文件系统"></a>GridFS文件系统</h1><p>GridFS 是 MongoDB 提供的用于持久化存储文件的模板，GridFS性能不是很优越 。</p>
+<p><strong>它的工作原理</strong></p>
+<p>在GridFS存储文件是将文件分块存储，文件会按照256KB的大小分割成多个块进行存储，GridFS使用两个集合(collection)存储文件，一个集合是chunks，用于存储文件的二进制数据；另一个集合是files，用于存储文件的元数据信息(文件名称，块大小，上传时间等)</p>
+<p>详细参考：<a target="_blank" rel="noopener" href="https://docs.mongodb.com/manual/core/gridfs/">https://docs.mongodb.com/manual/core/gridfs/</a></p>
+<p><strong>使用</strong></p>
+<p>存文件</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Autowired</span></span><br><span class="line">GridFsTemplate gridFsTemplate;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">testGridFsTemplate</span><span class="params">()</span></span>&#123;</span><br><span class="line">    File file = <span class="keyword">new</span> File(<span class="string">&quot;path&quot;</span>);</span><br><span class="line">    FileInputStream inputStrem = <span class="keyword">new</span> FileInputStream(file);</span><br><span class="line">    ObjectId objectId = gridFsTemplate.store(inputStream,<span class="string">&quot;测试文件01&quot;</span>,<span class="string">&quot;&quot;</span>);</span><br><span class="line">    <span class="comment">//将id存到对应pageId的模板id字段中</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>读文件</p>
+<p>定义配置类，用于打开下载流对象</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MongoConfig</span></span>&#123;</span><br><span class="line">    <span class="meta">@Value(&quot;$&#123;spring.data.mongodb.database&#125;&quot;)</span></span><br><span class="line">    String db;</span><br><span class="line">    </span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> GridFSBucket <span class="title">getGridFSBucket</span><span class="params">(MongoClient mongoClient)</span></span>&#123;</span><br><span class="line">        MongoDatabase database = mongoClient.getDatabase(db);</span><br><span class="line">        GridFSBucket bucket = GridFSBuckets.create(database);</span><br><span class="line">        ruturn bucket;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>使用</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Autowired</span></span><br><span class="line"><span class="keyword">private</span> GridFSBucket gridFSBucket;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">testGridFsTemplate</span><span class="params">()</span></span>&#123;</span><br><span class="line">    gRIDfsfILE GRIDfsfile = gridFsTemplate.findOne(Query.query(Criteria.where(<span class="string">&quot;_id&quot;</span>).is(<span class="string">&quot;objectId&quot;</span>)));</span><br><span class="line">    GridFsDownloadStream gridFSDownloadStream = gridFSBucket.openDownloadStream(gridFSFile.getObjectId());</span><br><span class="line">    GridFsResource gridFsResource = <span class="keyword">new</span> GridFsResource(gridFSFile,gridFSDownloadStream);</span><br><span class="line">    </span><br><span class="line">    String s = IOUtils.toString(gridFsResouce.getInputStream(),<span class="string">&quot;UTF-8&quot;</span>);</span><br><span class="line">    sout(s);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="NFS文件系统"><a href="#NFS文件系统" class="headerlink" title="NFS文件系统"></a>NFS文件系统</h1><p>最大的特点就是可以通过网络，让不同的机器，不同的操作系统共享彼此的文件。</p>
+<p>NFS服务器可以让PC将网络中的NFS服务器共享的目录挂碍到本地端的文件系统中，而在本地端的系统来看，这个远程主机的目录就好像是自己的一个磁盘分区一样。</p>
+<p>一般NFS服务器端口在2049，但NFS还需要其他的程序去启动额外的端口，这些额外的的端口用来传输数据的端口是随机选择的，是小于1024的端口，通过RPC同一管理这些端口来让客户端知道对应的服务端端口</p>
+<h2 id="部署"><a href="#部署" class="headerlink" title="部署"></a>部署</h2><h3 id="Linux"><a href="#Linux" class="headerlink" title="Linux"></a>Linux</h3><ol>
+<li>前置文件：</li>
+</ol>
+<p>RPC主程序:rpcbind:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install -y rpcbind</span><br></pre></td></tr></table></figure>
+<p>NFS主程序:nfs-utils:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install -y  nfs-utils   </span><br></pre></td></tr></table></figure>
+<p>启动服务和设置开机启动</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">systemctl start rpcbind</span><br><span class="line">systemctl enable rpcbind</span><br><span class="line">systemctl start nfs-server nfs-secure-server</span><br><span class="line">systemctl enable nfs-server nfs-secure-server</span><br><span class="line">firewall-cmd --permanent --add-service=nfs</span><br><span class="line">firewall-cmd --reload</span><br></pre></td></tr></table></figure>
+<ol start="2">
+<li><p>编辑服务端配置文件，设置NFS服务端共享目录及客户端权限</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">mkdir /public</span><br><span class="line">vi /etc/exports</span><br><span class="line">	/public &lt;ip1&gt;/&lt;port1&gt;(ro) #public目录</span><br><span class="line">	/protected &lt;ip2&gt;/&lt;port2&gt;(rw)</span><br><span class="line">systemctl reload nfs</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>共享目录public允许访问的客户端为<ip1>/<port1>网络用户，权限为只读</p>
+<p>还有其他的参数</p>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>ro</td>
+<td>只读</td>
+</tr>
+<tr>
+<td>rw</td>
+<td>读写</td>
+</tr>
+<tr>
+<td>root-squash</td>
+<td>当NFS客户端以root管理员访问时，映射为NFS服务器的匿名用户</td>
+</tr>
+<tr>
+<td>no_root_squash</td>
+<td>当NFS客户端以root管理员访问时，映射为NFS服务器的root管理员</td>
+</tr>
+<tr>
+<td>all_squash</td>
+<td>无论NFS客户端使用什么账户访问，均映射为NFS服务器的匿名用户</td>
+</tr>
+<tr>
+<td>sync</td>
+<td>同时将数据写入到内存与硬盘中，保证不丢失数据</td>
+</tr>
+<tr>
+<td>async</td>
+<td>优先将数据保存到内存，然后再写入硬盘；这样效率更高，但可能会丢失数据</td>
+</tr>
+</tbody></table>
+</li>
+<li><p>客户端挂载配置</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash">查看nfs服务器共享信息</span></span><br><span class="line">showmount -e &lt;服务器ip&gt;</span><br><span class="line"><span class="meta">#</span><span class="bash">查看本机挂载的文件资源情况</span></span><br><span class="line">showmount -a</span><br><span class="line"></span><br><span class="line">mkdir /test/public</span><br><span class="line">mkdir /test/protected</span><br><span class="line">vi /etc/fstab</span><br><span class="line">	&lt;服务器ip&gt;:/public /test/public nfs defaults 0 0</span><br><span class="line">	&lt;服务器ip&gt;:/protected /test/protected nfs defaults 0 1</span><br><span class="line">mount -a #使文件/etc/fstab生效</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash">检查</span></span><br><span class="line">df -Th</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h3 id="Windows"><a href="#Windows" class="headerlink" title="Windows"></a>Windows</h3></li>
+</ol>
+<p>控制面板-&gt;添加程序和功能-&gt;添加NFS组件</p>
+<p>我的电脑-&gt;映射驱网络驱动器-&gt;配置文件夹:\\&lt;服务端ip&gt;\目录</p>
+<p>如果权限有问题，打开注册表:regedit，在HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\ClientForNFS\CurrentVersion\Default下新建AnonymousGid,默认值为0，新建AnonymousUid，默认值为0</p>
+<h2 id="存在的问题"><a href="#存在的问题" class="headerlink" title="存在的问题"></a>存在的问题</h2><h1 id="Nginx"><a href="#Nginx" class="headerlink" title="Nginx"></a>Nginx</h1><p>因为cms需要有多个后端服务，同时nginx可以作为静态资源服务器</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">docker pull nginx</span><br><span class="line">docker run --name nginx -d -p 80:80 -v /usr/docker/nginx/html:/usr/share/nginx/html -v /etc/docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro -v /etc/docker/nginx/conf.d:/etc/ginx/conf.d -v /etc/docker/nginx/logs:/var/log/nginx nginx</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+
+
+      
+
+      
+        <div class="page-reward">
+          <a href="javascript:;" class="page-reward-btn tooltip-top">
+            <div class="tooltip tooltip-east">
+            <span class="tooltip-item">
+              赏
+            </span>
+            <span class="tooltip-content">
+              <span class="tooltip-text">
+                <span class="tooltip-inner">
+                  <p class="reward-p"><i class="icon icon-quo-left"></i>谢谢你请我吃糖果<i class="icon icon-quo-right"></i></p>
+                  <div class="reward-box">
+                    
+                    
+                  </div>
+                </span>
+              </span>
+            </span>
+          </div>
+          </a>
+        </div>
+      
+    </div>
+    <div class="article-info article-info-index">
       
       
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2021" class="archive-year">2021</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/01/20/Nginx%E3%80%81MyCat%E3%80%81MongoDB/" class="archive-article-date">
-  	<time datetime="2021-01-19T16:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-01-20</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2021/01/20/Nginx%E3%80%81MyCat%E3%80%81MongoDB/">Nginx、Mycat、MongoDB</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags icon"></i>
 		<ul class="article-tag-list">
@@ -191,136 +326,114 @@
 		</ul>
 	</div>
 
-          
+      
 
+      
+
+      
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
         </div>
-        <div class="clearfix"></div>
-    </header>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//pan.baidu.com/share/qrcode?url=http://example.com/2021/01/20/cms%E5%8F%8A%E9%9D%99%E6%80%81%E5%8C%96/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
+      
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
+
   
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/01/20/Dubbo%E3%80%81Netty%E3%80%81JMS%E3%80%81AMQP/" class="archive-article-date">
-  	<time datetime="2021-01-19T16:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-01-20</time>
-</a>
+<nav id="article-nav">
+  
+    <a href="/2021/01/20/Dubbo%E3%80%81Netty%E3%80%81JMS%E3%80%81AMQP/" id="article-nav-newer" class="article-nav-link-wrap">
+      <i class="icon-circle-left"></i>
+      <div class="article-nav-title">
+        
+          Dubbo、Netty、JMS、AMQP
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2021/01/20/%E6%97%B6%E5%BA%8F%E6%95%B0%E6%8D%AE%E5%BA%93/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">时序数据库</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
         </div>
-    	 
+        
+        
+    </div>
+</aside>
+
+
+
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2021/01/20/Dubbo%E3%80%81Netty%E3%80%81JMS%E3%80%81AMQP/">Dubbo、Netty、JMS、AMQP</a>
-    </h1>
+  
   
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">框架及中间件</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/01/20/cms%E5%8F%8A%E9%9D%99%E6%80%81%E5%8C%96/" class="archive-article-date">
-  	<time datetime="2021-01-19T16:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-01-20</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2021/01/20/cms%E5%8F%8A%E9%9D%99%E6%80%81%E5%8C%96/">cms及静态化</a>
-    </h1>
   
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">框架及中间件</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/01/20/%E6%97%B6%E5%BA%8F%E6%95%B0%E6%8D%AE%E5%BA%93/" class="archive-article-date">
-  	<time datetime="2021-01-19T16:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-01-20</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2021/01/20/%E6%97%B6%E5%BA%8F%E6%95%B0%E6%8D%AE%E5%BA%93/">时序数据库</a>
-    </h1>
   
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">框架及中间件</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-  
-    </div></section>
-  
-
-    
-    <nav id="page-nav">
-      <a class="extend prev" rel="prev" href="/archives/2021/01/page/2/">&amp;laquo; Prev</a><a class="page-number" href="/archives/2021/01/">1</a><a class="page-number" href="/archives/2021/01/page/2/">2</a><span class="page-number current">3</span>
-    </nav>
   
 
 
@@ -344,8 +457,8 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
-		isArchive: true,
+		isPost: true,
+		isArchive: false,
 		isTag: false,
 		isCategory: false,
 		open_in_new: false,
