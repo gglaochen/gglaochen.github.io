@@ -152,6 +152,54 @@
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-k8s" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p><img src="/images/k8s%E6%8A%80%E8%83%BD%E8%B0%B1%E5%9B%BE.jpg"></p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2021/02/04/k8s/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-Arthas" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1901,103 +1949,6 @@ start-&gt;controller、cola-test</code></pre>
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2021/01/20/nacos/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-rockermq宕机及重复消费问题" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2021/01/20/rockermq%E5%AE%95%E6%9C%BA%E5%8F%8A%E9%87%8D%E5%A4%8D%E6%B6%88%E8%B4%B9%E9%97%AE%E9%A2%98/">RocketMq宕机及重复消费问题</a>
-    </h1>
-  
-
-        
-        <a href="/2021/01/20/rockermq%E5%AE%95%E6%9C%BA%E5%8F%8A%E9%87%8D%E5%A4%8D%E6%B6%88%E8%B4%B9%E9%97%AE%E9%A2%98/" class="archive-article-date">
-  	<time datetime="2021-01-19T16:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-01-20</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h1 id="一、宕机"><a href="#一、宕机" class="headerlink" title="一、宕机"></a>一、宕机</h1><ul>
-<li><p>消息消费的具体流程是什么？<br>rocketmq消息是pull模式，如果master正常，则从master上拉取消息；如果master挂掉，会从slave上拉取消息（虽然slave不能写消息，但是可用写消费进度）<br>在broker和消费端都正常的情况下，消费端在拉取到消息后，<br>每消费完一批消息（批的大小consumeMessageBatchMaxSize在DefaultMQPushConsumer中可以设置，默认是1），就会把消息进度写到消费端的内存中，<br>然后是定时（persistConsumerOffsetInterval，默认每隔5秒）向broker发起请求写这个MessageQueue的消息进度（如果没同步消费端就宕机可能导致重复消费）<br>broker拿到某个topic下的messageQueue消费进度会存到内存，然后定时持久化到文件中。（如果没有持久化就宕机可能导致重复消费）<br>如果消费端抛异常，消费端也会消费进度+1，但会向broker发送retry主题的消息（以%RETRY%开头的主题），消费端这么做的目的是不阻碍消费进度，有错误先提交进度，出错的消息挪到后面去消费</p>
-</li>
-<li><p>如果broker(指master)宕机，消费端会怎么样？<br>如果消费端消费成功，则提交不了消费进度，如果消费失败，消费进度和重试的主题消息都写不成功。没发送成功的消息消费端会放入processQueue继续消费。所以会导致无限发消息重复消费的情况，直到broker启动或者消费端关闭</p>
-</li>
-<li><p>虽然master挂了，但如果有slave会怎么样？</p>
-<p>当master停机时，消费者会从slave上拉取消息进行消费，会提交消费进度到slave上。但如果消费时发生异常，向slave发送retry主题，因为slave不接受写消息，也会导致消费端无限重复消费的情况</p>
-</li>
-<li><p>rocketmq的数据持久化流程是什么</p>
-<p>producer发送的消息会顺序写入CommitLog中，CommitLog每个文件最大1GB，写满后会创建新的CommitLog，消息写入的时候，不是直接写入磁盘，而是先写入到os cache中，然后操作系统调度线程通过<strong>异步刷盘</strong>将缓存中的数据写入磁盘（异步刷盘的性能非常高，如果需要确保消息不会丢失，还是要采用同步刷盘策略）</p>
-<h1 id="二、重复消费"><a href="#二、重复消费" class="headerlink" title="二、重复消费"></a>二、重复消费</h1><h2 id="1-rocketmq什么情况下会发生重复消费？"><a href="#1-rocketmq什么情况下会发生重复消费？" class="headerlink" title="1. rocketmq什么情况下会发生重复消费？"></a>1. rocketmq什么情况下会发生重复消费？</h2></li>
-</ul>
-<p>可以根据rocketmq的消费流程看到重复消费的情况：</p>
-<p>rocketmq消息是pull模式，如果master正常，则从master上拉取消息；如果master挂掉，会从slave上拉取消息（虽然slave不能写消息，但是可用写消费进度）消费端每次会拉取一批消息，如果offset为1的消息处理很慢，而之后的消息虽然已经处理完了，但还是无法提交（因为下标提交从小到大），这时候消费端宕机，因为消费进度没有提交，会导致除1之外的消息被重复消费<br>在broker和消费端都正常的情况下，消费端在拉取到消息后，每消费完一批消息（批的大小consumeMessageBatchMaxSize在DefaultMQPushConsumer中可以设置，默认是1），就会把消息进度写到消费端的内存中，然后是定时（persistConsumerOffsetInterval，默认每隔5秒）向broker发起请求写这个MessageQueue的消息进度（<em>如果没同步消费端就宕机可能导致重复消费</em>）<br>broker拿到某个topic下的messageQueue消费进度会存到内存，然后定时持久化到文件中。（<em>如果没有持久化就宕机可能导致重复消费</em>）<br>如果消费端抛异常，消费端也会消费进度+1，如果是集群消费，默认情况下还会向broker发送retry主题的消息（以%RETRY%开头的主题），广播消费不会发送retry主题。消费端这么做的目的是不阻碍消费进度，有错误先提交进度，出错的消息挪到后面去消费(<em>但出错可能导致部分代码重复消费，所以需要使用try捕获异常</em>)</p>
-<p>另外，如果broker(这里指master)宕机，消费者将提交不了消费进度，没发送成功的消息消费端会放入processQueue继续消费，所以会导致无限发消息重复消费的情况，直到broker启动或者消费端关闭。如果master宕机但存在对应的slave，消费者会从slave上拉取消息进行消费，会提交消费进度到slave上。但如果消费时发生异常，向slave发送retry主题，因为slave不接受写消息，也会导致消费端无限重复消费的情况</p>
-<h2 id="2-保证消息不被重复消费的方案"><a href="#2-保证消息不被重复消费的方案" class="headerlink" title="2. 保证消息不被重复消费的方案"></a>2. 保证消息不被重复消费的方案</h2><ol>
-<li>消费端处理消息的业务逻辑保持幂等性</li>
-<li>保证每条消息都有唯一编号且保证消息处理成功与去重表的日志同时出现<ul>
-<li>首先在数据库中新增一张去重表(id,发送时间，消费状态，错误信息)</li>
-<li>发送端：消息中使用IdGen生成唯一主键(只能保存到消息体中，因为消费时只能拿到消息体)<br><code>异步发送、同步发送</code> - 在发送前保存到去重表，状态为待发送（保存失败也不会发送消息，保存成功发送失败可以定时清理发送时间过久的状态为未消费的消息）<br><code>事务消息发送</code> - 定义一个事务执行器(实现LocalTransactionExecuter接口)，在消息发送成功后此时消息状态为PREPARED（消费端不会消费该状态数据），然后回调实现LocalTransactionExecuter接口的方法（保存消息到去重表），然后消息对消费端可见</li>
-<li>消费端：根据消息中的主键和未消费状态修改数据为已消费，获取受影响的行数（如果是1则执行消费逻辑，如果是0则不执行逻辑，需要配置数据库连接?useAffectedRows=true才能返回影响行数），另外为了避免消费失败导致的重试（默认情况下集群消息会重试，广播消息不会重试，可能导致部分代码重复消费的情况），需要捕获消费端的异常。在try代码块最后删除对应的记录（消费成功），在catch块中修改状态为消费失败，并添加错误信息</li>
-</ul>
-</li>
-</ol>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">框架及中间件</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2021/01/20/rockermq%E5%AE%95%E6%9C%BA%E5%8F%8A%E9%87%8D%E5%A4%8D%E6%B6%88%E8%B4%B9%E9%97%AE%E9%A2%98/">展开全文 >></a>
         </p>
       
 

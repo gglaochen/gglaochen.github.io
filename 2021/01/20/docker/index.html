@@ -16,7 +16,7 @@
 <meta property="og:description" content="docker依赖于宿主机的内核（包括硬件、网络等） 不同容器间彻底隔离，除宿主机内核外没有共用的依赖，所以启动更轻量级。  docker容器其实只是个特殊的 “单进程” 模型 即带有特殊启动参数的Linux进程，但它并不是只有一个进程，而是只有一个进程可控，即经过nameSpace处理后pid&#x3D;1的进程，pid&#x3D;1的进程挂了能被 dockerd 感知到，其他后台进程的管理和调度不受 docker">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2021-01-19T16:00:00.000Z">
-<meta property="article:modified_time" content="2021-02-01T12:38:06.717Z">
+<meta property="article:modified_time" content="2021-02-04T06:47:39.446Z">
 <meta property="article:author" content="John Doe">
 <meta property="article:tag" content="服务器">
 <meta name="twitter:card" content="summary">
@@ -193,7 +193,7 @@
 <ul>
 <li><code>namespace</code>: 新创建的线程看到的是一个全新的进程空间，通过修改进程看待整个计算机”视图”，在这个空间里它的pid是1，但在宿主机真实的进程空间里，这个进程的PID还是真实值，所以说容器其实只是一种特殊的进程(但不是单进程。而是只有一个进程可控)</li>
 <li><code>Cgroups</code> :虽然有了namespace，容器只能看到容器里的情况，但在宿主机上，它和别的进程之间依然是平等竞争关系，所以需要Cgroup进行进程资源限制(CPU、内存、磁盘、带宽等等)，</li>
-<li><code>rootfs</code> :通过chroot修改容器进程的根目录，并在新建的根目录中挂载了整个操作系统的文件和目录。所以打包时，打包的既是应用，也是操作系统文件，所以才能保证容器的一致性。容器镜像一般会挂载在/var/lib/docker目录下</li>
+<li><code>chroot</code> :通过 chroot 修改容器进程的根目录，并在新建的根目录中挂载了操作系统完整的文件和目录 (不包括 liunx 内核)。所以打包时，打包的内容会包含操作系统文件，所以才能保证容器的一致性。容器镜像一般会挂载在 /var/lib/docker 目录下 (实际上，Mount Namespace 正是基于 rootfs 的不断改良发明出来的，它是Linux 操作系统里的第一个 nameSpace)</li>
 </ul>
 <p>当然容器化存在一些虚拟化没有的问题，那就是隔离不彻底。</p>
 <ol>
@@ -214,13 +214,14 @@
 <li>Registry</li>
 </ul>
 <p>是Docker的镜像存储的服务器，服务器下有多个仓库。或者这么说，Docker干的事情就是把整个应用、操作系统、配置打包成一个静态的镜像，这个镜像可以快速的启动和停止。但这种能力对单个人是没有多大意义的，我们需要有个地方把镜像存下来，然后用一个url分享给其他人。</p>
-<h1 id="四、三要素：仓库、镜像、容器"><a href="#四、三要素：仓库、镜像、容器" class="headerlink" title="四、三要素：仓库、镜像、容器"></a>四、三要素：仓库、镜像、容器</h1><p>在docker中所有的image(镜像)都在Docker Hub（docker仓库）中，开发人员可以把自己的容器打包一个镜像到Docker Hub中让运维人员去拉取镜像。</p>
+<h1 id="四、三要素：仓库、镜像、容器"><a href="#四、三要素：仓库、镜像、容器" class="headerlink" title="四、三要素：仓库、镜像、容器"></a>四、三要素：仓库、镜像、容器</h1><p>在 docker 中所有的 容器镜像 都在 Docker Hub（docker仓库）中，开发人员可以把自己的容器打包一个镜像到Docker Hub中让运维人员去拉取镜像。</p>
 <blockquote>
 <p>Docker Hub官网：<a target="_blank" rel="noopener" href="https://hub.docker.com/">https://hub.docker.com</a></p>
 </blockquote>
-<p>镜像不可以直接使用，需要创建Container(容器)后使用，一个镜像相当于java中的类，容器相当于类的一个实例</p>
-<p>docker的镜像都是只读的，当容器启动的时候，一个新的可写层被加载到镜像的顶部。</p>
-<p>这一层通常被称为<strong>容器层</strong>，容器层之下的都叫<strong>镜像层</strong></p>
+<p>docker 的 容器镜像 有个更专业的名字，叫做 <strong>rootfs</strong>(根文件系统)。即指挂载在容器根目录上，用来为容器提供隔离后执行环境的文件系统 (不包含运行时文件)</p>
+<p>rootfs 中存在依赖关系的镜像不会把依赖的镜像文件拷贝到自己的镜像文件中，而是直接使用依赖的镜像文件。这里用到了一种 <strong>联合文件系统</strong>(Union File System)的能力，最主要的功能是将多个不同位置的目录联合挂载在同一个目录下，对文件的修改也会同步到原先的目录中。</p>
+<p>容器运行时会在原有存在多层依赖关系的 <strong>只读镜像层</strong> 上追加一层 <strong>可读可写层</strong>。所有的增、删、改都发生在这里，这一层可以通过定义writeout文件来“删除”只读层，其实只是定义了一个类似.gitignore的文件来屏蔽需要删除的只读的文件。</p>
+<p>除了只读层和可读可写层，还有一层 <strong>init层</strong>。夹在只读层和可读可写层之间，用于存放一些从只读镜像层抽象出来的初始化配置文件。因为在启动容器时往往会指定一些参数，并且这些参数不需要在执行docker commit的时候一起打包，所以这些文件会在打包时被忽略。</p>
 <h1 id="五、centOS-Docker-安装"><a href="#五、centOS-Docker-安装" class="headerlink" title="五、centOS Docker 安装"></a>五、centOS Docker 安装</h1><blockquote>
 <p>前提：</p>
 <p>Docker支持以下的centOS版本：</p>
