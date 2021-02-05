@@ -16,7 +16,7 @@
 <meta property="og:description" content="docker依赖于宿主机的内核（包括硬件、网络等） 不同容器间彻底隔离，除宿主机内核外没有共用的依赖，所以启动更轻量级。  docker容器其实只是个特殊的 “单进程” 模型 即带有特殊启动参数的Linux进程，但它并不是只有一个进程，而是只有一个进程可控，即经过nameSpace处理后pid&#x3D;1的进程，pid&#x3D;1的进程挂了能被 dockerd 感知到，其他后台进程的管理和调度不受 docker">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2021-01-19T16:00:00.000Z">
-<meta property="article:modified_time" content="2021-02-04T06:47:39.446Z">
+<meta property="article:modified_time" content="2021-02-05T07:55:40.369Z">
 <meta property="article:author" content="John Doe">
 <meta property="article:tag" content="服务器">
 <meta name="twitter:card" content="summary">
@@ -220,7 +220,14 @@
 </blockquote>
 <p>docker 的 容器镜像 有个更专业的名字，叫做 <strong>rootfs</strong>(根文件系统)。即指挂载在容器根目录上，用来为容器提供隔离后执行环境的文件系统 (不包含运行时文件)</p>
 <p>rootfs 中存在依赖关系的镜像不会把依赖的镜像文件拷贝到自己的镜像文件中，而是直接使用依赖的镜像文件。这里用到了一种 <strong>联合文件系统</strong>(Union File System)的能力，最主要的功能是将多个不同位置的目录联合挂载在同一个目录下，对文件的修改也会同步到原先的目录中。</p>
-<p>容器运行时会在原有存在多层依赖关系的 <strong>只读镜像层</strong> 上追加一层 <strong>可读可写层</strong>。所有的增、删、改都发生在这里，这一层可以通过定义writeout文件来“删除”只读层，其实只是定义了一个类似.gitignore的文件来屏蔽需要删除的只读的文件。</p>
+<p>容器运行时会在原有存在多层依赖关系的 <strong>只读层（镜像层）</strong> 上追加一层 **可读可写层(容器层)**。所有的增、删、改都发生在这里，相同的文件会覆盖下层的文件。</p>
+<ul>
+<li><p>这一层可以通过定义writeout文件来“删除”只读层文件，其实只是定义了一个类似.gitignore的文件来屏蔽需要删除的只读的文件 ( 所以你把只读层的文件删了，镜像也不会变小:grin:)</p>
+</li>
+<li><p>至于修改文件，用到了Copy-On-Write机制，Copy-On-Write是程序开发中比较常用的优化手段，在想要修改一个内存块的数据时，先将内存拷贝一份，在新的内存块中进行写操作，写完之后，将原来的内存指针指向新的内存，这是一种<strong>延时懒惰机制</strong>，保证了数据永远可读。</p>
+<p>对于容器，我们将只读层的文件拷贝到读写层进行修改，修改的结果会覆盖下层的文件。</p>
+</li>
+</ul>
 <p>除了只读层和可读可写层，还有一层 <strong>init层</strong>。夹在只读层和可读可写层之间，用于存放一些从只读镜像层抽象出来的初始化配置文件。因为在启动容器时往往会指定一些参数，并且这些参数不需要在执行docker commit的时候一起打包，所以这些文件会在打包时被忽略。</p>
 <h1 id="五、centOS-Docker-安装"><a href="#五、centOS-Docker-安装" class="headerlink" title="五、centOS Docker 安装"></a>五、centOS Docker 安装</h1><blockquote>
 <p>前提：</p>
@@ -297,7 +304,12 @@
 <li><p>重新进入后台运行的容器</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker exec -it 容器id  /bin/bash  #在容器中打开新的终端，并且启动新的进程，可以在当前容器直接返回查询结果也可以进入容器</span><br><span class="line">attach #直接进入容器，不会启动新的进程</span><br></pre></td></tr></table></figure>
 <p>docker容器内一般没有vi命令，可以通过以下方式下载vi命令,但这种修改是临时性的，需要永久可以通过挂载</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">apt-get update</span><br><span class="line">apt-get install vim	#下载vi命令</span><br><span class="line">docker run -v localConfigFile:/containerPath</span><br></pre></td></tr></table></figure></li>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">apt-get update</span><br><span class="line">apt-get install vim	#下载vi命令</span><br><span class="line">docker run -v localConfigFile:/containerPath</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>ps: docker exec实现原理：依赖linux的setns命令让新进程和容器进程共享nameSpace，即宿主几下/proc/[容器真实进程号]/ns目录下的所有NameSpace文件。 基于这个原理，docker本身也提供了和别的容器同享namespace的功能</p>
+<p>docker run -it –net container:4ddf4638572d busybox</p>
+</blockquote>
+</li>
 <li><p>容器与主机间文件的互相拷贝</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker cp 容器id:容器内路径 目的主机路径</span><br><span class="line">docker cp 主机文件路径 容器id/容器名：要拷贝到容器里面对应的路径</span><br></pre></td></tr></table></figure></li>
 <li><p>启动容器</p>
@@ -318,7 +330,7 @@
 <li><p>提交本地容器到本地镜像库中</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker commit -a=&quot;作者名&quot; -m=&quot;描述&quot; 容器id 新镜像名:Tag</span><br></pre></td></tr></table></figure></li>
 <li><p>提交本地镜像到镜像仓库</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker image push NAME[:tag]</span><br><span class="line"><span class="meta">#</span><span class="bash"> 可能要先完成认证授权后才执行push操作 docker login</span></span><br></pre></td></tr></table></figure></li>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">docker image push [repository/]NAME[:tag]</span><br><span class="line"><span class="meta">#</span><span class="bash"> 要先完成认证授权后才执行push操作 docker login</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 提交前可以通过docker tag repository/name:tag 来给镜像起一个完整的名字</span></span><br></pre></td></tr></table></figure></li>
 <li><p>导出本地镜像到本地tar</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker image save -o 镜像名</span><br></pre></td></tr></table></figure></li>
 <li><p>tar包导入本地镜像</p>
@@ -428,7 +440,8 @@
 <p>用来在构建镜像过程中设置环境变量</p>
 </li>
 <li><p>VOLUME</p>
-<p>需要挂载的容器文件夹路径</p>
+<p>需要挂载的容器文件夹路径，这里其实就是将容器内目录的 <strong>dentry</strong>(指针) 指向了宿主机的 <strong>inode</strong>(文件对象) 这样我们在修改容器内文件的时候，其实就是在修改宿主机的文件对象，而容器的文件实体其实一直是空，所以docker commit的时候提交的挂载目录也是一个空目录</p>
+<p>ps:但如果容器的挂载目录下本来就有文件，宿主机对应的文件对象也会包含这些文件，</p>
 </li>
 <li><p>ONBUILD</p>
 <p>父镜像的在被子镜像继承后父镜像的onbuild被触发</p>
@@ -461,7 +474,7 @@
 </ul>
 </li>
 </ol>
-<h1 id="十、-镜像仓库"><a href="#十、-镜像仓库" class="headerlink" title="十、 镜像仓库"></a>十、 镜像仓库</h1><p>镜像仓库主流实现方案有两种：Docker Registry 和 Harbor</p>
+<h1 id="十、-镜像仓库"><a href="#十、-镜像仓库" class="headerlink" title="十、 镜像仓库"></a>十、 镜像仓库</h1><p>可以用于公司内部的搭建自己的镜像仓库，镜像仓库主流实现方案有两种：Docker Registry 和 Harbor</p>
 <h2 id="1-Docker-Registry"><a href="#1-Docker-Registry" class="headerlink" title="1. Docker Registry"></a>1. Docker Registry</h2><p>镜像仓库是容器三大核心组件中的重要组成部分，Docker 镜像仓库一般有本地镜像仓库、Docker Hub 公共仓库和其他第三方公共仓库三种。一个 Docker Registry中科院包含多个仓库(Repository)；每个仓库科院包含多个标签(tag)；每个标签对应一个镜像</p>
 <p>Docker Hub 是 Docker 公司官方提供的公共镜像仓库，此镜像库中提供了上万种官方镜像文件</p>
 <p>但国内访问 Docker Hub 上的服务比较慢，因此国内主流容器云服务商提供了针对Docker Hub的镜像服务，这些镜像服务被称为加速器。</p>
