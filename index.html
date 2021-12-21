@@ -152,6 +152,377 @@
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-架构总结" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2021/10/08/%E6%9E%B6%E6%9E%84%E6%80%BB%E7%BB%93/">架构总结</a>
+    </h1>
+  
+
+        
+        <a href="/2021/10/08/%E6%9E%B6%E6%9E%84%E6%80%BB%E7%BB%93/" class="archive-article-date">
+  	<time datetime="2021-10-07T16:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-10-08</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="一、访问远程服务"><a href="#一、访问远程服务" class="headerlink" title="一、访问远程服务"></a>一、访问远程服务</h1><h2 id="1-进程间通信-IPC"><a href="#1-进程间通信-IPC" class="headerlink" title="1. 进程间通信(IPC)"></a>1. 进程间通信(IPC)</h2><ul>
+<li><p>管道、具名管道</p>
+<p>管道允许在进程间传递少量的字符流和字节流。普通管道只用于有亲缘关系的进程间通信，具名管道因为摆脱了普通管道没有名字的限制，允许无亲缘关系的进程间通信。其常见的应用就是命令行中的 <code>|</code> 操作</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ps -ef|grep java</span><br></pre></td></tr></table></figure>
+<p>将 <code>ps</code> 进程的输出连接到 <code>grep</code> 进程上</p>
+</li>
+<li><p>信号</p>
+<p>异步通信机制，一个进程不必通过特定操作等待信号的到达，进程也不知道信号什么时候到达，但只能承载少量信息，</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kill -9 &lt;pid&gt;</span><br></pre></td></tr></table></figure>
+<p>shell 进程向 Pid 进程发送 kill 信号</p>
+</li>
+<li><p>信号量</p>
+<p>相当于在操作系统定义一个全局变量，会在创建时赋予初始值，初始值为1就是互斥锁，一个任务想要访问共享资源，就必须先获得信号量，获得信号量后值会-1，释放后恢复。负几就表示有几个进程正在等待访问共享资源</p>
+</li>
+<li><p>消息队列</p>
+<p>上述三种方式只能用于传输少量信息，消息队列克服了信号承载信息量少，管道只能用于无格式字节流以及缓冲区大小受限等缺点，但实时性相对受限</p>
+</li>
+<li><p>共享内存</p>
+<p>允许多个进程访问同一块公共的内存空间，通常和其他通信方式结合，如：信号量，来达到进程间同步及异步的协调操作</p>
+</li>
+<li><p>套接字接口</p>
+<p>以上方式只适用于单机多进程通信，套接字可以在不同机器的进程间通信，针对本机的进程间通信会优化，不需要经过网络协议栈，所以断网情况下也能ping本地</p>
+</li>
+</ul>
+<h2 id="2-远程进程通信-RPC"><a href="#2-远程进程通信-RPC" class="headerlink" title="2. 远程进程通信(RPC)"></a>2. 远程进程通信(RPC)</h2><p>由于远程通信的成本问题，如：网络受延迟、带宽、安全性限制；以及被调用方异常的处理、请求超时的处理等需要针对特定业务场景的处理。rpc的通信细节不适合隐藏在操作系统底层，而应该是高层次的或者说语言层次的特征</p>
+<p>不同的 rpc 协议主要通过各自的手段解决以下三个基本问题</p>
+<ul>
+<li><p>如何序列化/反序列化数据</p>
+<ul>
+<li>ONC RPC 的<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/External_Data_Representation">External Data Representation</a> （XDR）</li>
+<li>CORBA 的<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Common_Data_Representation">Common Data Representation</a>（CDR）</li>
+<li>Java RMI 的<a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/platform/serialization/spec/protocol.html#a10258">Java Object Serialization Stream Protocol</a></li>
+<li>gRPC 的<a target="_blank" rel="noopener" href="https://developers.google.com/protocol-buffers">Protocol Buffers</a></li>
+<li>Web Service 的<a target="_blank" rel="noopener" href="https://docs.microsoft.com/en-us/dotnet/standard/serialization/xml-serialization-with-xml-web-services">XML Serialization</a></li>
+<li>众多轻量级 RPC 支持的<a target="_blank" rel="noopener" href="https://tools.ietf.org/html/rfc7159">JSON Serialization</a></li>
+</ul>
+</li>
+<li><p>如何传输数据</p>
+<p>这里的传输指应用层协议，实际传输一般基于标准的tcp、udp等完成</p>
+<ul>
+<li>Java RMI 的<a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/platform/rmi/spec/rmi-protocol3.html">Java Remote Message Protocol</a>（JRMP，也支持<a target="_blank" rel="noopener" href="https://zh.wikipedia.org/w/index.php?title=RMI-IIOP&action=edit&redlink=1">RMI-IIOP</a>）</li>
+<li>CORBA 的<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/General_Inter-ORB_Protocol">Internet Inter ORB Protocol</a>（IIOP，是 GIOP 协议在 IP 协议上的实现版本）</li>
+<li>DDS 的<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Data_Distribution_Service">Real Time Publish Subscribe Protocol</a>（RTPS）</li>
+<li>Web Service 的<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/SOAP">Simple Object Access Protocol</a>（SOAP）</li>
+<li>如果要求足够简单，双方都是 HTTP Endpoint，直接使用 HTTP 协议也是可以的（如 JSON-RPC）</li>
+</ul>
+</li>
+<li><p>如何确定方法</p>
+<ul>
+<li>Android 的<a target="_blank" rel="noopener" href="https://developer.android.com/guide/components/aidl">Android Interface Definition Language</a>（AIDL）</li>
+<li>CORBA 的<a target="_blank" rel="noopener" href="https://www.omg.org/spec/IDL">OMG Interface Definition Language</a>（OMG IDL）</li>
+<li>Web Service 的<a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/WSDL">Web Service Description Language</a>（WSDL）</li>
+<li>JSON-RPC 的<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/JSON-WSP">JSON Web Service Protocol</a>（JSON-WSP）</li>
+</ul>
+</li>
+</ul>
+<h2 id="3-表征状态转移-REST"><a href="#3-表征状态转移-REST" class="headerlink" title="3. 表征状态转移(REST)"></a>3. 表征状态转移(REST)</h2><p><code>表征</code> ：即资源的表现形式或者叫信息与用户交互的形式，可能是html、markdown、pdf、rss等</p>
+<p><code>状态</code> ：服务器是否维护上一请求与下一个请求间的上下文，如：分页时，用户当前阅读页维护在客户端则为无状态；维护在服务端则为有状态。个人理解为同一资源在不同客户端需求下展现的不同状态</p>
+<p><code>转移</code>：不论是客户端对表征还是状态的变化都需要通过请求服务端的方式来实现，比如：客户端访问电子书请求下一页请求，服务端将 ‘电子书’ 这个资源进行页码状态变化后以application/json的表征形式提供给客户端</p>
+<p><strong>RESTful</strong></p>
+<p>rest 和 restful 的关系是，rest的作用范围是架构风格与网络的软件架构设计，而restful是远程服务调用的设计，前者是后者的超集，而restful的系统需要满足以下六个原则：</p>
+<ul>
+<li>服务端和客户端分离</li>
+<li>无状态</li>
+<li>可缓存：因为无状态的设计导致每次请求的上下文都维护在客户端，原来一个请求就能完成的业务可能需要请求多次，或者在请求中带有额外的冗余信息，所以允许客户端和中间的通讯传递者将部分的服务端应答缓存起来，以进一步提高性能</li>
+<li>分层系统：客户端不许知道请求经过了哪些中间服务器到达最终的服务器，中间服务器可以实现内容分发网络、负载均衡、共享缓存能功能</li>
+<li>统一接口：即面向资源编程，所有针对资源的操作通过http协议中固有的操作命令完成</li>
+<li>按需代码：主要应用于前端，逻辑代码存储在服务端，只有当被请求后才会将代码传输到客户端执行，执行后销毁</li>
+</ul>
+<p><strong>REST的接口设计相比rpc主要有以下优势</strong></p>
+<ol>
+<li>语义类似，降低的服务接口的学习成本</li>
+<li>因为资源天生具有层次结构和集合，可以很方便的根据资源的上下级定义<code>/</code>来间隔</li>
+<li>rest复用HTTP 协议中已经定义的概念和相关基础支持来解决问题，而http协议已经无比成熟</li>
+</ol>
+<p><strong>同时也存在以下劣势</strong></p>
+<ol>
+<li>面向资源的编程思想只适合做 CRUD，面向过程、面向对象编程才能处理真正复杂的业务逻辑</li>
+<li>与http绑定，不适用于高性能传输场景</li>
+<li>相比于 WS-AtomicTransaction、WS-Coordination 这样的天生支持事务的功能性协议，http显然是不支持分布式事务的，不过这不止是rest的问题</li>
+<li>http没有传输可靠性支持，意味着没有收到响应可能是发送时出现问题也可能是响应时出现问题，所以就要求接口幂等，http协议要求GET、PUT 和 DELETE 应具有幂等性，我们把 REST 服务映射到这些方法时，也应当保证幂等性；针对post浏览器一般会做一些预处理，如：是否重复提交表单的确认</li>
+<li>针对多个资源单位或者获取资源部分字段的请求，处理能力不够强。有针对这方面的中间框架graphql，但因为不好在数据库层面性能优化、接口鉴权等问题并没有推广开来</li>
+</ol>
+<h1 id="二、事务处理"><a href="#二、事务处理" class="headerlink" title="二、事务处理"></a>二、事务处理</h1><h2 id="1-本地事务"><a href="#1-本地事务" class="headerlink" title="1. 本地事务"></a>1. 本地事务</h2><p>事务主要就是为了保证数据状态的一致性(Consistency)，这需要以下三个方面的努力(AID)</p>
+<ul>
+<li><code>原子性</code>：在一个事务范围内，对数据的修改，要么全部成功，要么全部失败</li>
+<li><code>隔离性</code>：在不同的事务范围内，对正在读、写的数据互相独立</li>
+<li><code>持久性</code>：保证已经被成功提交的数据都能被正确持久化</li>
+</ul>
+<p><strong>原子性和持久性</strong></p>
+<p>实现 <code>原子性</code> 最大的困难是写入操作不是原子的，有写入、未写入和正在写状态，所以可能出现以下两种情况</p>
+<ol>
+<li><code>未提交事务，写入后崩溃</code>：重启后数据库需要得知crash前发生的不完整操作，并将数据恢复为没有改动过的样子，以保证原子性</li>
+<li><code>已提交事务，写入前崩溃</code>：重启后数据库需要得知crash前发生的不完整操作，并将还未来得及写入磁盘的数据重新写入，以保证持久性</li>
+</ol>
+<p>由于写入的中间状态和crash都不可避免，所以实现的重点要放在<code>崩溃恢复</code>上，而崩溃恢复的方法主要有以下几种形式：</p>
+<ul>
+<li><p>Commit Logging</p>
+<p>每次执行数据库修改操作，将修改的数据原始值、变化后的值、磁盘位置以顺序追加的方式将日志记录到磁盘上，同时也会记录<code>事务提交</code>消息和<code>结束提交</code>消息用于查验是否数据真的被持久化成功,这个日志被称为 <code>redo log-重做日志</code>(可以解决已提交事务，写入前崩溃)</p>
+<p>这种方式的缺点是只能在发生事务提交后才真正开始执行磁盘io操作，无论磁盘io多么空间、事务修改的数据量多么大、占用了多少内存缓冲区，都不允许在提交事务前执行io，所以对提升数据库性能十分不利</p>
+</li>
+<li><p>Write-Ahead Logging</p>
+<p>允许在提交事务前就修改数据，将已经修改了哪些值，磁盘位置等记录为日志，以便发生崩溃或者回滚时根据Undo Log对提前写入的数据进行擦除，这种日志被称为 <code>undo log-回滚日志</code>(可以解决未提交事务，写入后崩溃)</p>
+</li>
+</ul>
+<p><strong>隔离性</strong></p>
+<p>实现隔离性，现代数据库主要提供了以下三种锁</p>
+<ul>
+<li><code>写锁(X-Lock)</code> ：如果数据有加写锁，就只有持有写锁的事务才能对数据进行写入操作，数据加持着写锁时，其他事务不能写入数据，也不能施加读锁</li>
+<li><code>读锁(S-Lock)</code>：多个事务可以对同一个数据添加多个读锁，数据被加上读锁后就不能再被加上写锁，所以其他事务不能对该数据进行写入，但仍然可以读取。对于持有读锁的事务，如果该数据只有它自己一个事务加了读锁，允许直接将其升级为写锁，然后写入数据</li>
+<li><code>范围锁</code>：对某个数据范围加排他锁，做个排他锁的作用范围不止是当前范围内的数据，也不能在这个范围内新增或删除任何数据</li>
+</ul>
+<p>mysql  InnoDB的行锁是针对索引加的锁，不是针对记录加的锁。并且该索引不能失效，否则都会从行锁升级为表锁。不同的数据库隔离级别通过使用不同的锁在不同加锁时间组合来实现：</p>
+<ul>
+<li><p>可串行化：同时使用了写锁、读锁和范围锁</p>
+</li>
+<li><p>可重复读：使用写锁和读锁，直到事务结束，会产生幻读问题，即一个事务范围内对两个完全相同的范围查询结果不同</p>
+<p><em>ps:mysql可重复读隔离级别有优化，只读事务没有幻读问题，读写事务依然存在幻读</em></p>
+</li>
+<li><p>读已提交：使用写锁到事务结束，读锁在读取完成后马上释放，会产生不可重复读问题，即在一个事务范围内对同一条数据查到不同的结果</p>
+</li>
+<li><p>读未提交：只对修改的数据加写锁，可能出现脏读问题，即在事务内读取另一个事务回滚的数据</p>
+</li>
+</ul>
+<p>除了通过锁的方式实现不同的隔离级别外，近年来还有一种通过版本控制实现隔离的方式，即 <code>MVCC</code> 多版本并发控制。MVCC的基本思想是通过版本戳下新老数据共存来实现读取不需要加锁的优化策略，给每个事物一个自增的id，然后如果隔离级别是可重复读，就获取版本小于当前事务id的记录；如果是隔离级别是读已提交，就直接获取最新的版本的记录</p>
+<h2 id="2-分布式事务"><a href="#2-分布式事务" class="headerlink" title="2. 分布式事务"></a>2. 分布式事务</h2><h3 id="2-1-XA协议、2PC、3PC"><a href="#2-1-XA协议、2PC、3PC" class="headerlink" title="2.1 XA协议、2PC、3PC"></a>2.1 XA协议、2PC、3PC</h3><p>X/Open组织在1991年提出了一套叫 <code>XA</code> 的处理事务框架，用于DTP(分布式事务处理)，目前可以作用于同一服务下多个数据源的场景。</p>
+<p>其核心是定义了一组分布式协调组件间的通信接口，组件间通过通信来协调多个数据源的一致操作，实现统一提交或者统一回滚，在java中也有针对XA协议的实现——JTA，XA协议组件主要包括以下：</p>
+<ul>
+<li><code>事务管理器 </code>如果是应用程序访问一堆数据库，那它是那个应用程序。如果是一群数据库之间（譬如你直接发送SQL语句）的XA事务，那它是发起事务的那个数据库。</li>
+<li><code>资源管理器</code> 一般指数据库实例</li>
+</ul>
+<p>基于XA接口规范衍生出了二段提交(2PC)和三段提交(3PC)协议</p>
+<p><strong>二段提交</strong></p>
+<ul>
+<li>准备阶段：协调者询问所有的参与者是否准备好提交（记录完成redo log，但没有记录’Commit Record’）</li>
+<li>提交阶段：如果所有参与者都返回了准备完成，则协调者先提交本地事务(记录’commit record’)，然后通知所有参与者提交本地事务；如果有一个参与者返回失败，则贴条这先将自己记录根据undo log回滚和通知所有参与者回滚本地事务</li>
+</ul>
+<p>在这个过程中存在一下问题：</p>
+<ul>
+<li>单点问题：协调者宕机，参与者一直没收到提交或回滚消息，导致资源一直被阻塞无法使用</li>
+<li>性能问题：整个上锁过程持续到参与者中最慢的一个完成处理操作，并且一旦协调者发除准备消息，所有参与者马上开始写redo log，涉及的资源都被锁住，如果某个参与者宣告失败，则都做了无用功</li>
+<li>一致性风险：在提交阶段和某些参与者连接断开或者出现了网络分区，就会出现部分提交部分回滚的现象</li>
+</ul>
+<p><strong>三段提交</strong></p>
+<p>为了解决二段提交中存在的单点问题和部分性能问题，后续又发展出了三段提交，将二段提交的准备阶段拆分为两个部分：CanCommit(检验参与者都没有宕机能不能ping通，业务是否能执行完成，但不记录日志)、PreCommit(记录redo log和undo log)，另外三端提交如果超时没有收到协调者发送的提交消息默认执行的是提交</p>
+<p>三段提交在事务正确执行的情况下和二段提交性能相似，但回滚时性能有所提升</p>
+<h3 id="2-2-CAP理论、BASE理论"><a href="#2-2-CAP理论、BASE理论" class="headerlink" title="2.2 CAP理论、BASE理论"></a>2.2 CAP理论、BASE理论</h3><p>从效果看，XA出发点追求的是强一致，实际效果是在节点网络恢复不了，或者某节点宕机且不可恢复时，保证不了一致性；进入提交阶段前，是需要得到所有节点的可提交回复后才可进行，只要有一个节点有性能问题，就会导致整个分布式事务出现性能问题。所以只在单服务多数据源的场景下有应用，分布式环境基于CAP理论和延伸的BASE理论有自己的解决方案。</p>
+<p><strong>CAP理论</strong></p>
+<p>在一个分布式环境下，设计共享数据问题时，以下三个特性最多只能同时满足其中两个：</p>
+<ul>
+<li><strong>一致性</strong>（<strong>C</strong>onsistency）：代表数据在任何时刻、任何分布式节点中所看到的都是符合预期的</li>
+<li><strong>可用性</strong>（<strong>A</strong>vailability）：代表系统不间断地提供服务的能力，理解可用性要先理解与其密切相关两个指标：<code>可靠性</code>和<code>可维护性</code>。可靠性使用平均无故障时间（MTBF）来度量；可维护性使用平均可修复时间（MTTR）来度量。可用性衡量系统可以正常使用的时间与总时间之比，其表征为：A=MTBF/（MTBF+MTTR），即可用性是由可靠性和可维护性计算得出的比例值</li>
+<li><strong>分区容忍性</strong>（<strong>P</strong>artition Tolerance）：代表分布式环境中部分节点因网络原因而彼此失联后，即与其他节点形成“网络分区”时，系统仍能正确地提供服务的能力</li>
+</ul>
+<p><strong>BASE理论</strong></p>
+<p>BASE 分别是基本可用性（<strong>B</strong>asically <strong>A</strong>vailable）、软状态（<strong>S</strong>oft State）和最终一致性（<strong>E</strong>ventually Consistent）的缩写</p>
+<h3 id="2-3-TCC"><a href="#2-3-TCC" class="headerlink" title="2.3 TCC"></a>2.3 TCC</h3><p>TCC是“Try-Confirm-Cancel”三个单词的缩写，是一种业务侵入式较强的事务方案，要求业务处理过程必须拆分为“预留业务资源”和“确认/释放消费资源”两个子过程</p>
+<ul>
+<li><strong>Try</strong>：尝试执行阶段，完成所有业务可执行性的检查（保障一致性），并且预留好全部需用到的业务资源（保障隔离性）。</li>
+<li><strong>Confirm</strong>：确认执行阶段，不进行任何业务检查，直接使用 Try 阶段准备的资源来完成业务处理。Confirm 阶段可能会重复执行，因此本阶段所执行的操作需要具备幂等性。</li>
+<li><strong>Cancel</strong>：取消执行阶段，释放 Try 阶段预留的业务资源。Cancel 阶段可能会重复执行，也需要满足幂等性。</li>
+</ul>
+<p>优点：几乎不会涉及到锁和资源的争用，具有很高的性能潜力。</p>
+<p>缺点：Try，Confirm，Cancel功能需要自己编码实现，业务侵入性较强，一般会结合框架使用，如：seata，来减轻一些编码工作量；遇到需要调第三方系统难以保证一致性，因为第三方系统不能随心所欲定义冻结、解冻、扣除操作，这时候就可以考虑另一种事务模式：SAGA</p>
+<h3 id="2-4-SAGA"><a href="#2-4-SAGA" class="headerlink" title="2.4 SAGA"></a>2.4 SAGA</h3><p>适用于业务流程长、有第三方系统参与且需要保证事务最终一致性的业务系统。</p>
+<p>把大事务拆分成若干个子事务,T1，T2，…，Ti，…，Tn</p>
+<p>每一个子事务都对应一个补偿动作，C1，C2，…，Ci，…，Cn</p>
+<p>要求子事务和回滚逻辑都具有幂等性、回滚逻辑和子事务不管谁先执行效果都是一样的</p>
+<p>当发生事务回滚时，有两种恢复策略</p>
+<ul>
+<li><strong>正向恢复</strong> 如果某一步事务提交失败，则一直对该事务进行重试，直到成功为止(最大努力交付)，适用于事务最终都要成功的场景</li>
+<li><strong>反向恢复</strong> 如果某一步事务提交失败，则对该笔及之前的事务执行定义的回归逻辑(失败则一直重试)</li>
+</ul>
+<p>同时，saga也要求记录日志(saga log)来保证系统恢复后可以追踪到子事务的执行情况，比如执行都到哪一步或者补偿到哪一步了。</p>
+<p>优点：一阶段提交本地数据库事务，高性能；补偿服务易于理解，易于实现。</p>
+<p>缺点：Saga无法保证隔离性，需要额外加锁保证(根据业务场景选择全局写锁还是全局读锁)。对事务和回滚逻辑要满足 幂等性 和 交换律，部分场景下难以实现</p>
+<h3 id="2-5-AT"><a href="#2-5-AT" class="headerlink" title="2.5 AT"></a>2.5 AT</h3><p>AT 事务是参照了 XA 两段提交协议来实现的，但解决了 XA 2PC 在准备阶段需要等待所有数据源返回成功后，协调者才能发出commit命令而导致的木桶效应。</p>
+<p>AT 事务会在收到prepare消息后直接提交本地事务，并记录sql修改前后的数据（和saga一样都是直接提交，但saga通过回滚逻辑回滚，AT通过数据快照回滚），在不加全局锁的情况都有可能在本地事务提交后，数据回滚前发生了数据变化导致 <code>脏写</code></p>
+<h3 id="2-6-GTS"><a href="#2-6-GTS" class="headerlink" title="2.6 GTS"></a>2.6 GTS</h3><p>GTS 增加了一个 <code>全局锁</code> 的概念，一般这个锁是写锁，只保证写隔离，因为阻塞读操作的话对性能影响太大</p>
+<h1 id="三、透明多级分流"><a href="#三、透明多级分流" class="headerlink" title="三、透明多级分流"></a>三、透明多级分流</h1><p>在用户使用信息系统的过程中，请求<em>从浏览器出发，在域名服务器的指引下找到系统的入口，经过网关、负载均衡器、缓存、服务集群等一系列设施，最后触及到末端存储于数据库服务器中的信息，然后逐级返回到用户的浏览器之中</em>。这其中要经过很多技术部件。作为系统的设计者，我们应该意识到不同的设施、部件在系统中有各自不同的价值</p>
+<ul>
+<li>有一些部件位于客户端或网络的边缘，能够迅速响应用户的请求，避免给后方的 I/O 与 CPU 带来压力，典型如本地缓存、内容分发网络、反向代理等</li>
+<li>有一些部件的处理能力能够线性拓展，易于伸缩，可以使用较小的代价堆叠机器来获得与用户数量相匹配的并发性能，应尽量作为业务逻辑的主要载体，典型如集群中能够自动扩缩的服务节点</li>
+<li>有一些部件稳定服务对系统运行有全局性的影响，要时刻保持着容错备份，维护着高可用性，典型如服务注册中心、配置中心</li>
+<li>有一些设施是天生的单点部件，只能依靠升级机器本身的网络、存储和运算性能来提升处理能力，如位于系统入口的路由、网关或者负载均衡器（它们都可以做集群，但一次网络请求中无可避免至少有一个是单点的部件）、位于请求调用链末端的传统关系数据库等，都是典型的容易形成单点部件</li>
+</ul>
+<p>对系统进行流量规划时，我们应该充分理解这些部件的价值差异，有两条简单、普适的原则能指导我们进行设计：</p>
+<ul>
+<li>第一条原则是尽可能减少单点部件，如果某些单点是无可避免的，则应尽最大限度减少到达单点部件的流量。在系统中往往会有多个部件能够处理、响应用户请求，譬如要获取一张存储在数据库的用户头像图片，浏览器缓存、内容分发网络、反向代理、Web 服务器、文件服务器、数据库都可能提供这张图片。恰如其分地引导请求分流至最合适的组件中，避免绝大多数流量汇集到单点部件（如数据库），同时依然能够在绝大多数时候保证处理结果的准确性，使单点系统在出现故障时自动而迅速地实施补救措施，这便是系统架构中多级分流的意义。</li>
+<li>另一条更关键的原则是奥卡姆剃刀原则。作为一名架构设计者，你应对多级分流的手段有全面的理解与充分的准备，同时清晰地意识到这些设施并不是越多越好。在实际构建系统时，你应当在有明确需求、真正必要的时候再去考虑部署它们。不是每一个系统都要追求高并发、高可用的，根据系统的用户量、峰值流量和团队本身的技术与运维能力来考虑如何部署这些设施才是合理的做法，在能满足需求的前提下，<strong>最简单的系统就是最好的系统</strong>。</li>
+</ul>
+<p>资源预下载，资源异步加载，资源压缩，dns加速，静态资源内容分发，多机房服务器就近访问，购买多条网络链路，防火墙过滤非法请求，F5硬件层面负载，反向代理软件层面负载均衡，API网关，多实例部署，缓存加速，一致性Hash分流，DB分库，异步任务队列等等都属于分流的手段。</p>
+<h2 id="1-客户端缓存"><a href="#1-客户端缓存" class="headerlink" title="1. 客户端缓存"></a>1. 客户端缓存</h2><p>HTTP 协议的无状态性决定了它必须依靠客户端缓存来解决网络传输效率上的缺陷</p>
+<p>从 HTTP/1.0 到 1.1、再到 2.0 版本的演进中，逐步形成了现在被称为“状态缓存”、“强制缓存”（或简称为“强缓存”）和“协商缓存”这三种 HTTP 缓存机制</p>
+<p><strong>状态缓存</strong></p>
+<p>指不经过服务器，客户端直接根据缓存信息来判断目标网站的状态。如：301//Moved Permanently（永久重定向）、HSTS机制，用来避免依赖 301/302 跳转 HTTPS 时，可能产生的降级中间人劫持问题</p>
+<p><strong>强制缓存</strong></p>
+<p>如果一段时间内，服务器响应未来一段时间资源内容和状态一定不会发生改变，则客户端可以一直使用该资源的本地副本</p>
+<p>根据约定，在浏览器的地址输入、页面链接跳转、新开窗口、前进和后退中，强制缓存都可以生效，但在用户主动刷新页面时应当自动失效</p>
+<p>在http协议中，设置了两类可以实现强制缓存的headers</p>
+<ul>
+<li><code>Expires</code>：后面跟缓存失效的时间，但因为这个时间是个时间点，所以受客户端本地时间影响；另外因为功能简单，浏览器、代理服务器、cdn不知道哪些该被自己缓存，比如用户敏感信息可以被浏览器缓存，但不应该被中间服务器缓存</li>
+<li><code>Cache-Control</code>：http1.1中定义，如果定义上和Expires上有冲突则Cache-Control优先级更高。<ul>
+<li>max-age 和 s-maxage：以秒为单位的缓存有效时长，s表示在允许被中间服务器缓存时，共享缓存的有效时长</li>
+<li>public 和 private：public表示可以被cdn、代理服务器缓存，private则只被浏览器缓存</li>
+<li>no-cache 和 no-store：no-cache 表明该资源不应该被缓存、no-store禁止浏览器、cdn等缓存</li>
+<li>no-transform：禁止资源被转换(压缩等)</li>
+<li>min-fresh 和 only-if-cached：是客户端请求的header，min-fresh用于建议服务器返回一个不少于该时间的缓存资源，only-if-cached 表示客户端要求不必给它发送资源的具体内容，此时客户端就仅能使用事先缓存的资源来进行响应，若缓存不能命中，就直接返回 503/Service Unavailable 错误</li>
+<li>must-revalidate 和 proxy-revalidate：must-revalidate 表示在资源过期后，一定需要从服务器中进行获取，即超过了 max-age 的时间后，就等同于 no-cache 的行为，proxy-revalidate 用于提示代理、CDN 等设备资源过期后的缓存行为，除对象不同外，语义与 must-revalidate 完全一致</li>
+</ul>
+</li>
+</ul>
+<p><strong>协商缓存</strong></p>
+<p>强制缓存是基于时效性的，而协商缓存是基于缓存内容变化检测的，相比强制缓存有更好的时效性但性能略差</p>
+<ul>
+<li><p>Last-Modified 和 If-Modified-Since</p>
+<p>Last-Modified告诉客户端这个资源的最后修改时间，而对于带有这个 Header 的资源，当客户端需要再次请求时，会通过 If-Modified-Since，把之前收到的资源最后修改时间再发送回服务端</p>
+<p>如果此时，服务端发现资源在该时间后没有被修改过，就只要返回一个 304/Not Modified 的响应即可，无需附带消息体，从而达到了节省流量的目的</p>
+<p>而如果此时，服务端发现资源在该时间之后有变动，就会返回 200/OK 的完整响应，在消息体中包含最新的资源</p>
+</li>
+<li><p>Etag 和 If-None-Match</p>
+<p>Etag 是服务器的响应 Header，用于告诉客户端这个资源的唯一标识，对于带有这个 Header 的资源，当客户端需要再次请求时，就会通过 If-None-Match，把之前收到的资源唯一标识发送回服务端</p>
+<p>如果此时，服务端计算后发现资源的唯一标识与上传回来的一致，就说明资源没有被修改过，同样也只需要返回一个 304/Not Modified 的响应即可，无需附带消息体，达到节省流量的目的</p>
+<p>而如果此时，服务端发现资源的唯一标识有变动，也一样会返回 200/OK 的完整响应，在消息体中包含最新的资源。</p>
+</li>
+</ul>
+<h2 id="2-域名解析"><a href="#2-域名解析" class="headerlink" title="2. 域名解析"></a>2. 域名解析</h2><p>DNS 也许是全世界最大、使用最频繁的信息查询系统，如果没有适当的分流机制，DNS 将会成为整个网络的瓶颈。</p>
+<p>DNS 的作用是把便于人类理解的域名地址，转换为便于计算机处理的 IP 地址</p>
+<p><strong>DNS的分类</strong></p>
+<ol>
+<li><p>根dns</p>
+<p>记录着顶级域名和对应的托管商，比如：.com由 Verisign 托管，<code>.apple</code>由苹果公司托管等。由于早期的 DNS 查询结果是一个512字节的 UDP 数据包。这个包最多可以容纳13个服务器的地址，因此就规定全世界有13个根域名服务器，这13台根域名服务器由12个组织独立运营，每家公司为了保证根域名服务器的可用性，会部署多个节点：<a target="_blank" rel="noopener" href="https://root-servers.org/%EF%BC%8C%E4%B8%80%E8%88%AC%E6%9C%AC%E6%9C%BA%E9%83%BD%E4%BC%9A%E4%BF%9D%E5%AD%98%E4%B8%80%E4%BB%BD%E6%A0%B9%E5%9F%9F%E5%90%8D%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84">https://root-servers.org/，一般本机都会保存一份根域名服务器的</a> IP 地址的缓存</p>
+</li>
+<li><p>权威dns</p>
+<p>是经过上一级授权对域名进行解析的服务器，同时它可以把解析授权转授给其他人,我们解析域名的结果都源自权威dns</p>
+</li>
+<li><p>递归dns</p>
+<p>负责缓存dns查询结果，避免用户请求重复向上查询。我们平时使用最多的就是这类dns，他对公众开放服务，一般由网络运营商提供服务，比如谷歌的8.8.8.8和8.8.4.4以及114的114.114.114.114和114.114.115.115都属于这一类DNS</p>
+</li>
+<li><p>转发dns</p>
+<p>它也具备缓存功能，但这个查询结果不是按标准的 域名解析 过程得到的，而是直接把递归DNS的结果转发给用户。他主要使用在没有直接的互联网连接，但可以连接到一个递归DNS那里，这时使用转发DNS就比较合适，我们路由器里面的dns就是这一类</p>
+</li>
+</ol>
+<p><strong>DNS的完整流程</strong></p>
+<p>以<a href="http://www.baidu.com.cn举例，以下是dns解析的完整步骤：">www.baidu.com.cn举例，以下是dns解析的完整步骤：</a></p>
+<ol>
+<li><p>DNS 会把域名还原为<a target="_blank" rel="noopener" href="http://www.baidu.com.cn/">www.baidu.com.cn</a>.  最后多了一个点“.”，表示“.root”的意思</p>
+</li>
+<li><p>客户端先检查本地递归dns缓存，确认其是否存活(ttl存活时间)，包括后续的每一级dns查询都是有类似的缓存查询的</p>
+<p>检查的顺序为：<a target="_blank" rel="noopener" href="http://www.baidu.com.cn的权威服务器/">www.baidu.com.cn的权威服务器</a> -&gt; baidu.com.cn的权威服务器 -&gt; com.cn的权威服务器 -&gt; cn的权威服务器 -&gt; 根域名服务器</p>
+</li>
+<li><p>如果都没有找到会请求根域名服务器拿到cn的权威服务器，然后请求cn的权威服务器得到com.cn的权威服务器，以此类推</p>
+</li>
+</ol>
+<p><strong>域名解析优化</strong></p>
+<p>DNS 系统多级分流的设计使得 DNS 系统能够经受住全球网络流量不间断的冲击，但也并非全无缺点，典型的问题是响应速度。</p>
+<p>一种方式是根据访问者所处的区域、不同服务商(电信、移动、联通)等因素来确定返回最适合的访问路线。</p>
+<p>也有一种前端 <code>DNS预取</code>的方式，如果网站后续要使用来自于其他域的资源，那就在网页加载时生成一个 link 请求，促使浏览器提前对该域名进行预解释</p>
+<p>DNS的多级体系还带来一个风险，就是每一级调用的时候都有可能被中间人劫持，这个风险一般来自于递归dns相关链路，甚至不少地区的运营商自己就会主动进行劫持，专门返回一个错的 IP，代理用户请求，以便给特定类型的资源（主要是 HTML）注入广告</p>
+<p>为此，最近几年出现了另一种新的 DNS 工作模式：<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/DNS_over_HTTPS">HTTPDNS</a>（也称为 DNS over HTTPS，DoH）。它将原本的 DNS 解析服务开放为一个基于 HTTPS 协议的查询服务，替代基于 UDP 传输协议的 DNS 域名解析，通过程序代替操作系统直接从权威 DNS 或者可靠的 Local DNS 获取解析数据，从而绕过传统 Local DNS</p>
+<h2 id="3-内容分发网络"><a href="#3-内容分发网络" class="headerlink" title="3. 内容分发网络"></a>3. 内容分发网络</h2><p>一个运作良好的内容分发网络（CDN），能为互联网系统解决跨运营商、跨地域物理距离所导致的时延问题，能为网站流量带宽起到分流、减负的作用</p>
+<p>内容分发网络的工作过程，主要涉及路由解析、内容分发、负载均衡和所能支持的 CDN 应用内容四个方面</p>
+<p><strong>路由解析</strong></p>
+<p>内容分发网络将用户请求路由到它的资源服务器上就是依靠 DNS 服务器来实现的</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">icyfenix.cn. 600 IN CNAME icyfenix.cn.cdn.dnsv1.com.icyfenix.cn.cdn.dnsv1.com. 599 IN CNAME 4yi4q4z6.dispatch.spcdntip.com.4yi4q4z6.dispatch.spcdntip.com. 60 IN A 101.71.72.192 #浙江宁波市</span><br><span class="line">4yi4q4z6.dispatch.spcdntip.com. 60 IN A 113.200.16.234 #陕西省榆林市</span><br><span class="line">4yi4q4z6.dispatch.spcdntip.com. 60 IN A 116.95.25.196 #内蒙古自治区呼和浩特市</span><br><span class="line">4yi4q4z6.dispatch.spcdntip.com. 60 IN A 116.178.66.65 #新疆维吾尔自治区乌鲁木齐市</span><br><span class="line">4yi4q4z6.dispatch.spcdntip.com. 60 IN A 118.212.234.1444yi4q4z6.dispatch.spcdntip.com. 60 IN A 211.91.160.2284yi4q4z6.dispatch.spcdntip.com. 60 IN A 211.97.73.2244yi4q4z6.dispatch.spcdntip.com. 60 IN A 218.11.8.2324yi4q4z6.dispatch.spcdntip.com. 60 IN A 221.204.166.704yi4q4z6.dispatch.spcdntip.com. 60 IN A 14.204.74.1404yi4q4z6.dispatch.spcdntip.com. 60 IN A 43.242.166.884yi4q4z6.dispatch.spcdntip.com. 60 IN A 59.80.39.1104yi4q4z6.dispatch.spcdntip.com. 60 IN A 59.83.204.124yi4q4z6.dispatch.spcdntip.com. 60 IN A 59.83.204.14</span><br></pre></td></tr></table></figure>
+<p>以上是有了dns解析后dns返回的地址信息，由此我们可以了解到cdn路由解析的工作流程</p>
+<ol>
+<li>架设好我们的服务器后，将服务器的ip地址在cdn服务商上注册为“源站”，注册后会得到一个CNAME，就是上面的 <code>icyfenxi.cn.cdn.dnsv1.com</code>，然后需要将得到的CNAME在之前购买域名的DNS服务商那记录一条CNAME记录</li>
+<li>用户请求后，会发现本地递归dns没有缓存，然后请求域名权威dns，获取之前记录的CNAME记录:icyfenxi.cn.cdn.dnsv1.com</li>
+<li>递归dns拿到CNAME后，再次请求CDN服务商所架设的权威服务器，这个 DNS 服务会根据一定的均衡策略和参数，比如拓扑结构、容量、时延等等，在全国各地能提供服务的 CDN 缓存节点中挑选一个最适合的，把它的 IP 替换成源站的 IP 地址，然后返回给本地 DNS</li>
+<li>本地dns将ip返回给浏览器后，浏览器会直接访问这个ip，但此时该ip的dns节点上可能还没有缓存过源站的资源(需要执行内容分发)</li>
+<li>经过内容分发后的 CDN 节点，就有能力代替源站向用户提供所请求的资源了</li>
+</ol>
+<p><strong>内容分发</strong></p>
+<p>CDN通过内容分发将资源副本缓存在客户端请求的CDN缓存节点上</p>
+<p>目前主要有两种内容分发的方式：</p>
+<ol>
+<li><p>主动分发</p>
+<p>由源站发起，将内容从源站或者其他资源库推送到用户边缘的各个CDN缓存节点上</p>
+<p>需要注意的是，因为主动分发的方式需要需要源站和CDN服务双方提供的程序API接口层面的配合，所以它对源站并不透明，只对用户透明</p>
+<p>这种方式一般适用于网站要预载大量资源的场景，如双十一活动。就会提前把活动用到的资源推送到cdn缓存节点，甚至是手机的app存储空间或者是浏览器的localStorage上</p>
+</li>
+<li><p>被动回源</p>
+<p>由用户访问触发，如果CDN缓存节点发现自己没有该资源，就会实时从源站中获取，所以首次访问通常会比较慢，不适合应用于数据量较大的资源，但是被动回源的方式可以做到完全的双向透明，不需要源站做任何配合，所以像阿里云、腾讯云基本都是采用的这种方式</p>
+</li>
+</ol>
+<p>CDN缓存节点资源管理的方式一般是 超时被动失效与手工主动失效相结合，缓存资源会给定生存期，超过了声明周期下次请求时会重新被动回源一次。而手动失效是指，CDN服务商一般会给源站提供失效缓存的接口，在网站更新资源时，由持续集成的流水线自动调用该接口来实现缓存更新</p>
+<p><strong>内容分发的应用场景</strong></p>
+<ul>
+<li>加速静态资源</li>
+<li>安全防御：CDN可以看做源站的<code>堡垒机</code>，源站只对CDN提供服务，然后由CDN来服务外界的其他用户，可以很好的避免如DDos攻击等问题</li>
+<li>协议升级：源站可以是http对接CDN节点，但CDN节点提供https，还比如http1.x-&gt;http/2|http/3、ipv4-&gt;ipv6</li>
+<li>状态缓存：源站的 301/302 转向就可以缓存起来，让客户端直接跳转；还可以通过 CDN 开启HSTS、通过 CDN 进行OCSP 装订，来加速 SSL 证书访问</li>
+<li>修改资源：可以对源站未压缩的资源自动压缩，并修改 Content-Encoding，以节省用户的网络带宽消耗，可以自动启用客户端缓存，可以加跨域；</li>
+<li>访问控制：IP黑/白名单，根据 IP 的访问流量来实现 QoS 控制、根据 HTTP 的 Referer 来实现防盗链</li>
+</ul>
+<h2 id="4-负载均衡"><a href="#4-负载均衡" class="headerlink" title="4. 负载均衡"></a>4. 负载均衡</h2><p>负载均衡器——承担了调度后方的多台机器，以统一的接口对外提供服务的技术组件</p>
+<p><strong>负载均衡的两种形式</strong></p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">框架及中间件</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2021/10/08/%E6%9E%B6%E6%9E%84%E6%80%BB%E7%BB%93/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-Arthas" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1901,103 +2272,6 @@ start-&gt;controller、cola-test</code></pre>
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2021/01/20/nacos/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-rockermq宕机及重复消费问题" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2021/01/20/rockermq%E5%AE%95%E6%9C%BA%E5%8F%8A%E9%87%8D%E5%A4%8D%E6%B6%88%E8%B4%B9%E9%97%AE%E9%A2%98/">RocketMq宕机及重复消费问题</a>
-    </h1>
-  
-
-        
-        <a href="/2021/01/20/rockermq%E5%AE%95%E6%9C%BA%E5%8F%8A%E9%87%8D%E5%A4%8D%E6%B6%88%E8%B4%B9%E9%97%AE%E9%A2%98/" class="archive-article-date">
-  	<time datetime="2021-01-19T16:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-01-20</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h1 id="一、宕机"><a href="#一、宕机" class="headerlink" title="一、宕机"></a>一、宕机</h1><ul>
-<li><p>消息消费的具体流程是什么？<br>rocketmq消息是pull模式，如果master正常，则从master上拉取消息；如果master挂掉，会从slave上拉取消息（虽然slave不能写消息，但是可用写消费进度）<br>在broker和消费端都正常的情况下，消费端在拉取到消息后，<br>每消费完一批消息（批的大小consumeMessageBatchMaxSize在DefaultMQPushConsumer中可以设置，默认是1），就会把消息进度写到消费端的内存中，<br>然后是定时（persistConsumerOffsetInterval，默认每隔5秒）向broker发起请求写这个MessageQueue的消息进度（如果没同步消费端就宕机可能导致重复消费）<br>broker拿到某个topic下的messageQueue消费进度会存到内存，然后定时持久化到文件中。（如果没有持久化就宕机可能导致重复消费）<br>如果消费端抛异常，消费端也会消费进度+1，但会向broker发送retry主题的消息（以%RETRY%开头的主题），消费端这么做的目的是不阻碍消费进度，有错误先提交进度，出错的消息挪到后面去消费</p>
-</li>
-<li><p>如果broker(指master)宕机，消费端会怎么样？<br>如果消费端消费成功，则提交不了消费进度，如果消费失败，消费进度和重试的主题消息都写不成功。没发送成功的消息消费端会放入processQueue继续消费。所以会导致无限发消息重复消费的情况，直到broker启动或者消费端关闭</p>
-</li>
-<li><p>虽然master挂了，但如果有slave会怎么样？</p>
-<p>当master停机时，消费者会从slave上拉取消息进行消费，会提交消费进度到slave上。但如果消费时发生异常，向slave发送retry主题，因为slave不接受写消息，也会导致消费端无限重复消费的情况</p>
-</li>
-<li><p>rocketmq的数据持久化流程是什么</p>
-<p>producer发送的消息会顺序写入CommitLog中，CommitLog每个文件最大1GB，写满后会创建新的CommitLog，消息写入的时候，不是直接写入磁盘，而是先写入到os cache中，然后操作系统调度线程通过<strong>异步刷盘</strong>将缓存中的数据写入磁盘（异步刷盘的性能非常高，如果需要确保消息不会丢失，还是要采用同步刷盘策略）</p>
-<h1 id="二、重复消费"><a href="#二、重复消费" class="headerlink" title="二、重复消费"></a>二、重复消费</h1><h2 id="1-rocketmq什么情况下会发生重复消费？"><a href="#1-rocketmq什么情况下会发生重复消费？" class="headerlink" title="1. rocketmq什么情况下会发生重复消费？"></a>1. rocketmq什么情况下会发生重复消费？</h2></li>
-</ul>
-<p>可以根据rocketmq的消费流程看到重复消费的情况：</p>
-<p>rocketmq消息是pull模式，如果master正常，则从master上拉取消息；如果master挂掉，会从slave上拉取消息（虽然slave不能写消息，但是可用写消费进度）消费端每次会拉取一批消息，如果offset为1的消息处理很慢，而之后的消息虽然已经处理完了，但还是无法提交（因为下标提交从小到大），这时候消费端宕机，因为消费进度没有提交，会导致除1之外的消息被重复消费<br>在broker和消费端都正常的情况下，消费端在拉取到消息后，每消费完一批消息（批的大小consumeMessageBatchMaxSize在DefaultMQPushConsumer中可以设置，默认是1），就会把消息进度写到消费端的内存中，然后是定时（persistConsumerOffsetInterval，默认每隔5秒）向broker发起请求写这个MessageQueue的消息进度（<em>如果没同步消费端就宕机可能导致重复消费</em>）<br>broker拿到某个topic下的messageQueue消费进度会存到内存，然后定时持久化到文件中。（<em>如果没有持久化就宕机可能导致重复消费</em>）<br>如果消费端抛异常，消费端也会消费进度+1，如果是集群消费，默认情况下还会向broker发送retry主题的消息（以%RETRY%开头的主题），广播消费不会发送retry主题。消费端这么做的目的是不阻碍消费进度，有错误先提交进度，出错的消息挪到后面去消费(<em>但出错可能导致部分代码重复消费，所以需要使用try捕获异常</em>)</p>
-<p>另外，如果broker(这里指master)宕机，消费者将提交不了消费进度，没发送成功的消息消费端会放入processQueue继续消费，所以会导致无限发消息重复消费的情况，直到broker启动或者消费端关闭。如果master宕机但存在对应的slave，消费者会从slave上拉取消息进行消费，会提交消费进度到slave上。但如果消费时发生异常，向slave发送retry主题，因为slave不接受写消息，也会导致消费端无限重复消费的情况</p>
-<h2 id="2-保证消息不被重复消费的方案"><a href="#2-保证消息不被重复消费的方案" class="headerlink" title="2. 保证消息不被重复消费的方案"></a>2. 保证消息不被重复消费的方案</h2><ol>
-<li>消费端处理消息的业务逻辑保持幂等性</li>
-<li>保证每条消息都有唯一编号且保证消息处理成功与去重表的日志同时出现<ul>
-<li>首先在数据库中新增一张去重表(id,发送时间，消费状态，错误信息)</li>
-<li>发送端：消息中使用IdGen生成唯一主键(只能保存到消息体中，因为消费时只能拿到消息体)<br><code>异步发送、同步发送</code> - 在发送前保存到去重表，状态为待发送（保存失败也不会发送消息，保存成功发送失败可以定时清理发送时间过久的状态为未消费的消息）<br><code>事务消息发送</code> - 定义一个事务执行器(实现LocalTransactionExecuter接口)，在消息发送成功后此时消息状态为PREPARED（消费端不会消费该状态数据），然后回调实现LocalTransactionExecuter接口的方法（保存消息到去重表），然后消息对消费端可见</li>
-<li>消费端：根据消息中的主键和未消费状态修改数据为已消费，获取受影响的行数（如果是1则执行消费逻辑，如果是0则不执行逻辑，需要配置数据库连接?useAffectedRows=true才能返回影响行数），另外为了避免消费失败导致的重试（默认情况下集群消息会重试，广播消息不会重试，可能导致部分代码重复消费的情况），需要捕获消费端的异常。在try代码块最后删除对应的记录（消费成功），在catch块中修改状态为消费失败，并添加错误信息</li>
-</ul>
-</li>
-</ol>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">框架及中间件</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2021/01/20/rockermq%E5%AE%95%E6%9C%BA%E5%8F%8A%E9%87%8D%E5%A4%8D%E6%B6%88%E8%B4%B9%E9%97%AE%E9%A2%98/">展开全文 >></a>
         </p>
       
 

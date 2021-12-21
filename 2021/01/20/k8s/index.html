@@ -8,14 +8,16 @@
   <link rel="dns-prefetch" href="http://example.com">
   <title>k8s | Hexo</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta property="og:type" content="article">
+  <meta name="description" content="一个正在运行的docker容器，可以被一分为二的看：  一组联合挂载在 &#x2F;var&#x2F;lib&#x2F;docker&#x2F;aufs&#x2F;mnt 上的 rootfs，这一部分我们称为“容器镜像”（Container Image），是容器的静态视图 一个由 Namespace+Cgroups 构成的隔离环境，这一部分我们称为“容器运行时”（Container Runtime），是容器的动态视图  容器编排 技术，通过定义">
+<meta property="og:type" content="article">
 <meta property="og:title" content="k8s">
 <meta property="og:url" content="http://example.com/2021/01/20/k8s/index.html">
 <meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="一个正在运行的docker容器，可以被一分为二的看：  一组联合挂载在 &#x2F;var&#x2F;lib&#x2F;docker&#x2F;aufs&#x2F;mnt 上的 rootfs，这一部分我们称为“容器镜像”（Container Image），是容器的静态视图 一个由 Namespace+Cgroups 构成的隔离环境，这一部分我们称为“容器运行时”（Container Runtime），是容器的动态视图  容器编排 技术，通过定义">
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="http://example.com/images/k8s%E6%8A%80%E8%83%BD%E8%B0%B1%E5%9B%BE.jpg">
 <meta property="article:published_time" content="2021-01-19T16:00:00.000Z">
-<meta property="article:modified_time" content="2021-02-04T07:30:46.092Z">
+<meta property="article:modified_time" content="2021-02-05T09:22:33.985Z">
 <meta property="article:author" content="John Doe">
 <meta property="article:tag" content="服务器">
 <meta name="twitter:card" content="summary">
@@ -176,6 +178,13 @@
     <div class="article-entry" itemprop="articleBody">
       
         <p><img src="/images/k8s%E6%8A%80%E8%83%BD%E8%B0%B1%E5%9B%BE.jpg"></p>
+<p>一个正在运行的docker容器，可以被一分为二的看：</p>
+<ul>
+<li>一组联合挂载在 /var/lib/docker/aufs/mnt 上的 rootfs，这一部分我们称为“容器镜像”（Container Image），是容器的静态视图</li>
+<li>一个由 Namespace+Cgroups 构成的隔离环境，这一部分我们称为“容器运行时”（Container Runtime），是容器的动态视图</li>
+</ul>
+<p><strong>容器编排</strong> 技术，通过定义容器组织和管理规范，同时提供路由网关、水平扩展、监控、备份、灾难恢复等服务，让容器生产化成为了可能。</p>
+<p>最具代表性的容器编排工具，当属 Docker 公司的 Compose+Swarm 组合，以及 Google 与 RedHat 公司共同主导的 Kubernetes 项目。</p>
 
       
 
